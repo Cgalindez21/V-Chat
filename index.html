@@ -136,32 +136,47 @@
         </div>
     </div>
 
-    <!-- MODAL INFORMATIVO DE NOVEDADES -->
+    <!-- MODAL INFORMATIVO DE NOVEDADES (FUNCIONES OFICIALES V-CHAT v1.2.0) -->
     <div id="changelog-modal" class="modal-overlay hidden" style="z-index: 10003;">
         <div class="modal-card" style="width: 460px; border-left: 5px solid var(--vchat-green);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0; color: var(--text-main); font-size: 22px; font-weight: bold;">
-                    <i class="fas fa-rocket" style="color: var(--vchat-green); margin-right: 8px;"></i> Novedades de V-Chat
+                    <i class="fas fa-info-circle" style="color: var(--vchat-green); margin-right: 8px;"></i> Funciones de V-Chat
                 </h3>
                 <span style="font-size: 11px; background: rgba(0, 191, 165, 0.15); color: var(--vchat-green); padding: 4px 8px; border-radius: 12px; font-weight: bold;">v1.2.0</span>
             </div>
             <div style="color: var(--text-sec); font-size: 14px; line-height: 1.6; display: flex; flex-direction: column; gap: 14px;">
-                <p style="color: var(--text-main); font-weight: bold;">Listado oficial de mejoras y funciones activas en la aplicación:</p>
+                <p style="color: var(--text-main); font-weight: bold;">Manual oficial de capacidades y funciones activas en la aplicación:</p>
                 <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 320px; overflow-y: auto;">
-                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px;">
-                        <li>• <strong>Sugerencia de Nombre de Usuario (NUEVO):</strong> Al registrarte, el sistema validará en tiempo real si el nombre de usuario está ocupado y te sugerirá opciones libres que podrás pulsar para autocompletar.</li>
-                        <li>• <strong>Bloqueo de Seguridad por Intentos (NUEVO):</strong> Si fallas tu contraseña de acceso 3 veces consecutivas, el sistema abrirá automáticamente la pasarela de recuperación de clave para resguardar tu cuenta.</li>
-                        <li>• <strong>Notificación de Cambio de Clave (NUEVO):</strong> Cuando reestablezcas tu contraseña, el bot de Telegram te enviará un aviso inmediato de confirmación de seguridad para evitar accesos no autorizados.</li>
-                        <li>• <strong>Test de Conexión de Telegram:</strong> Ahora puedes pulsar un botón de prueba al configurar tu ID para comprobar instantáneamente si tu bot de Telegram está listo para enviarte notificaciones.</li>
-                        <li>• <strong>Recuperación de Contraseña por Telegram:</strong> Ahora puedes solicitar un código OTP único de 6 dígitos que llegará al instante a tu bot de Telegram vinculado para restaurar tu contraseña de forma segura.</li>
-                        <li>• <strong>Gestión de Amigos desde Telegram:</strong> Acepta o rechaza solicitudes de amistad al instante haciendo clic en los accesos rápidos embebidos dentro de las notificaciones de tu bot de Telegram.</li>
-                        <li>• <strong>Alertas de Interacción de Historias:</strong> Notificación inmediata de comentarios en tus V-Moments, resguardando tu privacidad ya que no se revelarán datos del remitente ni del texto original en el aviso.</li>
-                        <li>• <strong>V-Moments (Feed de Historias):</strong> Publica fotos, videos (máx. 3 min) o canciones reales de tu teléfono con reproductor de audio (V-Player) integrado. Auto-eliminación segura del servidor a las 24 horas.</li>
-                        <li>• <strong>Swipe en Comentarios:</strong> Desliza cualquier comentario a la izquierda (o haz clic en PC) para reaccionar rápido con corazón (❤️) o responder mencionando al usuario (@usuario).</li>
-                        <li>• <strong>V-Music (Música en Perfil):</strong> Vincula un archivo de audio local para mostrar tu estado interactivo "🎵 Escuchando: [Canción]" y compártela de forma opcional como historia.</li>
-                        <li>• <strong>Menciones Estilizadas:</strong> Las menciones @usuario se resaltan automáticamente como etiquetas de diseño dinámicas.</li>
-                        <li>• <strong>Mensajería Privada Segura:</strong> Envío de fotos, notas de voz de hasta 2 minutos, ticks de lectura/entrega, edición y borrado de mensajes o vaciado completo de chats.</li>
-                        <li>• <strong>Soporte Android:</strong> Compatible con dispositivos móviles Android 5.0 (Lollipop) o superior. Se recomienda Android 7.0+ y mantener actualizada la aplicación "Android System WebView".</li>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px;">
+                        <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-shield-alt"></i> Seguridad y Acceso</strong>
+                            • <b>Sesión Única Estricta:</b> Bloqueo físico de inicio de sesión múltiple para proteger las cuentas de accesos simultáneos no autorizados.<br>
+                            • <b>Prevención de Intenteos:</b> Bloqueo temporal automático y redirección a recuperación tras fallar 3 veces la clave de acceso.<br>
+                            • <b>Doble Recuperación:</b> Recuperación de contraseña por Pregunta Secreta o mediante Código OTP único de Telegram.
+                        </li>
+                        <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-comments"></i> Mensajería Privada</strong>
+                            • <b>Mensajes Multimedia:</b> Envío de mensajes de texto, fotos de alta calidad y notas de voz con interfaz integrada.<br>
+                            • <b>Control Total:</b> Edición de mensajes enviados, eliminación definitiva del servidor y vaciado completo de conversaciones privadas.<br>
+                            • <b>Confirmación de Lectura:</b> Indicadores visuales de envío (un tick), entrega (doble tick gris) y lectura (doble tick verde).
+                        </li>
+                        <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-photo-video"></i> V-Moments (Historias)</strong>
+                            • <b>Publicaciones Verticales:</b> Comparte fotos, videos (hasta 3 min en cuentas gratis y 10 min en VIP) o canciones de tu teléfono.<br>
+                            • <b>Auto-Eliminación:</b> Depuración bi-direccional y purga automática de historias del servidor tras cumplirse las 24 horas.<br>
+                            • <b>Comentarios y Reacciones:</b> Reacciona con emojis, comenta historias y usa el atajo "Swipe" (deslizar) para responder rápido mencionando al usuario con la etiqueta estilizada <b>@usuario</b>.
+                        </li>
+                        <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-music"></i> Sincronización Musical</strong>
+                            • <b>V-Music de Perfil:</b> Vincula un archivo de audio local para mostrar de forma dinámica tu estado "Escuchando: [Canción]" en la lista de amigos.<br>
+                            • <b>V-Player de Historias:</b> Comparte tus canciones en los V-Moments con un reproductor de audio integrado para tus contactos.
+                        </li>
+                        <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fab fa-telegram-plane"></i> Integración con Telegram</strong>
+                            • <b>Notificaciones de Alerta:</b> Recibe avisos en Telegram de tus mensajes y comentarios resguardando tu privacidad (sin detallar contenido).<br>
+                            • <b>Gestión Amistad desde Telegram:</b> Acepta o rechaza solicitudes de amistad directamente mediante botones y enlaces rápidos en tus chats.
+                        </li>
                     </ul>
                 </div>
             </div>
