@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Biblioteca criptográfica CryptoJS integrada para cifrado de extremo a extremo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
 
@@ -136,7 +138,7 @@
         </div>
     </div>
 
-    <!-- MODAL INFORMATIVO DE NOVEDADES (FUNCIONES OFICIALES V-CHAT v1.2.0) -->
+    <!-- MODAL INFORMATIVO DE NOVEDADES -->
     <div id="changelog-modal" class="modal-overlay hidden" style="z-index: 10003;">
         <div class="modal-card" style="width: 460px; border-left: 5px solid var(--vchat-green);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -150,9 +152,13 @@
                 <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 320px; overflow-y: auto;">
                     <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px;">
                         <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-lock"></i> Cifrado de Mensajes (NUEVO)</strong>
+                            • <b>Cifrado Extremo a Extremo (E2EE):</b> Los chats de texto ahora se cifran mediante algoritmos criptográficos AES-256 en el dispositivo del remitente y se descifran localmente en el del receptor. La base de datos solo almacena texto cifrado ilegible para absoluta privacidad.
+                        </li>
+                        <li>
                             <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-shield-alt"></i> Seguridad y Acceso</strong>
                             • <b>Sesión Única Estricta:</b> Bloqueo físico de inicio de sesión múltiple para proteger las cuentas de accesos simultáneos no autorizados.<br>
-                            • <b>Prevención de Intenteos:</b> Bloqueo temporal automático y redirección a recuperación tras fallar 3 veces la clave de acceso.<br>
+                            • <b>Prevención de Intentos:</b> Bloqueo temporal automático y redirección a recuperación tras fallar 3 veces la clave de acceso.<br>
                             • <b>Doble Recuperación:</b> Recuperación de contraseña por Pregunta Secreta o mediante Código OTP único de Telegram.
                         </li>
                         <li>
