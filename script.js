@@ -333,7 +333,6 @@ if (loginIdInput) {
                 if (data) {
                     const suggestion = `${val}${Math.floor(100 + Math.random() * 899)}`;
                     userStatusLabel.style.color = '#ff3b30';
-                    // Permite autocompletar pulsando directamente sobre la sugerencia sugerida
                     userStatusLabel.innerHTML = `<i class="fas fa-times-circle"></i> Ocupado. Prueba con: <b style="color:var(--vchat-green); cursor:pointer;" onclick="document.getElementById('login-identifier').value='${suggestion}'; document.getElementById('username-availability-status').style.display='none';">${suggestion}</b>`;
                 } else {
                     userStatusLabel.style.color = 'var(--vchat-green)';
@@ -380,6 +379,18 @@ authForm.onsubmit = async (e) => {
                     iden = userData.username.toLowerCase();
                 }
             }
+
+            // CORREGIDO: Bloqueo estricto de inicio de sesión múltiple antes de conceder la autorización
+            const { data: userProfile, error: profileErr } = await _supabase
+                .from('users')
+                .select('id, status')
+                .eq('username', iden)
+                .maybeSingle();
+
+            if (!profileErr && userProfile && userProfile.status === 'online') {
+                throw new Error("Esta cuenta ya tiene una sesión activa en otro dispositivo. Cierra la sesión en el otro equipo antes de iniciar aquí.");
+            }
+
             const email = `${iden}@vchat.app`;
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
             
@@ -392,7 +403,6 @@ authForm.onsubmit = async (e) => {
         if (err.message.includes("Invalid login credentials") || err.message.includes("does not match") || err.message.includes("invalid_grant")) {
             friendlyMsg = "Usuario o contraseña incorrectos. Por favor, verifica tus datos.";
             
-            // INTEGRA: Si se falla 3 veces la clave se dispara el modal de recuperación pre-rellenado automáticamente
             if (!isRegistering) {
                 failedLoginAttempts++;
                 if (failedLoginAttempts >= 3) {
@@ -424,7 +434,6 @@ document.getElementById('btn-recovery-next').onclick = async () => {
             return;
         }
         
-        // CORREGIDO: Búsqueda con soporte para mayúsculas/minúsculas de base de datos
         const response = await _supabase
             .from('users')
             .select('*')
@@ -491,7 +500,6 @@ document.getElementById('btn-recovery-reset').onclick = async () => {
     
     showToast("Clave actualizada");
     
-    // INTEGRA: Notificar de forma inmediata a Telegram el éxito del cambio de clave
     if (currentUserRecovery.telegram_chat_id) {
         await sendTelegramMessage(currentUserRecovery.telegram_chat_id, `🔑 <b>Cambio de Contraseña Exitoso</b>\n\nTu contraseña de V-Chat ha sido actualizada de forma segura en nuestro sistema.`);
     }
@@ -1118,7 +1126,6 @@ async function autoPurgeStories(statuses) {
 }
 
 async function loadStatuses() {
-    // CORREGIDO: Consulta de statuses unificada y limpia de JOINs para evitar PGRST116 (No relation)
     const { data: statuses, error: sErr } = await _supabase
         .from('statuses')
         .select('*')
@@ -1137,7 +1144,6 @@ async function loadStatuses() {
     let reactions = [];
 
     if (statusIds.length > 0) {
-        // CORREGIDO: Consulta de comentarios de statuses limpia de claves foráneas
         const { data: cData } = await _supabase
             .from('status_comments')
             .select('*')
@@ -1323,7 +1329,7 @@ window.toggleCommentSwipe = (commentId) => {
     const item = document.getElementById(`comment-item-${commentId}`);
     if (item) {
         item.style.transition = "transform 0.2s ease";
-        if (item.classList.contains('swiped-left')) {
+        if (item.contains('swiped-left')) {
             item.classList.remove('swiped-left');
             item.style.transform = "translateX(0px)";
         } else {
@@ -1441,7 +1447,6 @@ window.editComment = async (commentId, oldCommentText) => {
     } catch (err) { showToast(err.message, true); }
 };
 
-// CORREGIDO: Solucionada la consulta de eliminación de comentarios (.eq('id', commentId))
 window.deleteComment = async (commentId) => {
     if (!confirm("¿Deseas eliminar este comentario?")) return;
     try {
@@ -1818,11 +1823,6 @@ async function showApp(user) {
             return;
         }
         
-        // INTEGRA: Control estricto de multicuenta (Sesión Única)
-        if (profile.status === 'online') {
-            showToast("Cerrando sesión activa en otros dispositivos...", true);
-        }
-        
         currentUser = profile;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
@@ -1898,7 +1898,6 @@ async function showApp(user) {
                 updatePremiumUI();
                 loadContacts();
                 loadStatuses();
-                showToast("Sincronización Premium activada");
             })
             .subscribe();
 
