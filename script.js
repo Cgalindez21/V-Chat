@@ -1373,7 +1373,7 @@ window.editComment = async (commentId, oldCommentText) => {
     } catch (err) { showToast(err.message, true); }
 };
 
-// CORREGIDO: Solucionada la desestructuración de consulta de eliminación de comentarios (.eq('id', commentId))
+// CORREGIDO: Solucionada la consulta de eliminación de comentarios (.eq('id', commentId))
 window.deleteComment = async (commentId) => {
     if (!confirm("¿Deseas eliminar este comentario?")) return;
     try {
@@ -1545,7 +1545,7 @@ if (profileMusicInput) {
         try {
             await _supabase.from('users').update({ listening_to: cleanedSongName }).eq('id', currentUser.id);
             currentUser.listening_to = cleanedSongName;
-            showToast(`Música actualizada: ${cleanedSongName}`);
+            showToast("Música actualizada");
             loadContacts();
 
             if (confirm(`¿Deseas compartir "${cleanedSongName}" también en tus historias?`)) {
@@ -1669,7 +1669,7 @@ function updatePremiumUI() {
 document.getElementById('copy-id-btn').onclick = () => {
     const idText = document.getElementById('settings-id').innerText;
     navigator.clipboard.writeText(idText);
-    showToast("ID copiando al portapapeles");
+    showToast("ID copiado al portapapeles");
 };
 
 // =======================================================
