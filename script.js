@@ -19,6 +19,9 @@ let audioChunks = [];
 let recordTimer = null;
 let selectedLocalSongFile = null;
 
+// Control de intentos fallidos de inicio de sesión
+let failedLoginAttempts = 0;
+
 // Variables para OTP de Telegram y Recuperación Temporal
 let generatedRecoveryCode = null;
 let currentUserRecovery = null;
@@ -64,7 +67,7 @@ const EMOJI_DATA = {
     "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','阱','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
     "Actividades": ['🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎁','🏆','🏅','🥇','⚽','⚾','🥎','🏀','🏈','🎾','🎱','🎯','🎮','🕹️','🎰','🎲','🧩','🧸','♠️','♥️','♦️','♣️','♟️','🎨','🎭','🎬'],
     "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','\uD83D\uDE4F','🛐','\uD83D\uDE4F','🛐','⛵','🛶','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
-    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💍','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📻','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','¼','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
+    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💍','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','RADIO','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
     "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦']
 };
 
@@ -299,6 +302,48 @@ toggleLink.onclick = () => {
     toggleLink.innerText = isRegistering ? "¿Ya tienes cuenta? Inicia Sesión" : "Crear una cuenta nueva";
 };
 
+// Sincronización en tiempo real para verificar la disponibilidad del nombre de usuario al escribir en registro
+const loginIdInput = document.getElementById('login-identifier');
+const userStatusLabel = document.getElementById('username-availability-status');
+
+let debounceTimer = null;
+if (loginIdInput) {
+    loginIdInput.oninput = () => {
+        if (!isRegistering) {
+            if (userStatusLabel) userStatusLabel.style.display = 'none';
+            return;
+        }
+        
+        clearTimeout(debounceTimer);
+        const val = loginIdInput.value.trim().toLowerCase();
+        if (val.length < 3) {
+            if (userStatusLabel) userStatusLabel.style.display = 'none';
+            return;
+        }
+        
+        debounceTimer = setTimeout(async () => {
+            const { data, error } = await _supabase
+                .from('users')
+                .select('username')
+                .eq('username', val)
+                .maybeSingle();
+                
+            if (userStatusLabel) {
+                userStatusLabel.style.display = 'block';
+                if (data) {
+                    const suggestion = `${val}${Math.floor(100 + Math.random() * 899)}`;
+                    userStatusLabel.style.color = '#ff3b30';
+                    // Permite autocompletar pulsando directamente sobre la sugerencia sugerida
+                    userStatusLabel.innerHTML = `<i class="fas fa-times-circle"></i> Ocupado. Prueba con: <b style="color:var(--vchat-green); cursor:pointer;" onclick="document.getElementById('login-identifier').value='${suggestion}'; document.getElementById('username-availability-status').style.display='none';">${suggestion}</b>`;
+                } else {
+                    userStatusLabel.style.color = 'var(--vchat-green)';
+                    userStatusLabel.innerHTML = `<i class="fas fa-check-circle"></i> Nombre de usuario disponible`;
+                }
+            }
+        }, 500);
+    };
+}
+
 authForm.onsubmit = async (e) => {
     e.preventDefault();
     requestNotificationPermission();
@@ -346,6 +391,21 @@ authForm.onsubmit = async (e) => {
         let friendlyMsg = err.message;
         if (err.message.includes("Invalid login credentials") || err.message.includes("does not match") || err.message.includes("invalid_grant")) {
             friendlyMsg = "Usuario o contraseña incorrectos. Por favor, verifica tus datos.";
+            
+            // INTEGRA: Si se falla 3 veces la clave se dispara el modal de recuperación pre-rellenado automáticamente
+            if (!isRegistering) {
+                failedLoginAttempts++;
+                if (failedLoginAttempts >= 3) {
+                    failedLoginAttempts = 0; // reset
+                    showToast("Intentos fallidos excedidos. Redirigiendo a recuperación...", true);
+                    setTimeout(() => {
+                        document.getElementById('recovery-identifier').value = iden;
+                        document.getElementById('recovery-modal').classList.remove('hidden');
+                        document.getElementById('btn-recovery-next').click();
+                    }, 2000);
+                    return;
+                }
+            }
         }
         showToast(friendlyMsg, true); 
     }
@@ -428,7 +488,15 @@ document.getElementById('btn-recovery-reset').onclick = async () => {
     const newP = document.getElementById('recovery-new-password').value;
     const response = await _supabase.rpc('reset_user_password', { p_user_id: currentUserRecovery.id, p_new_password: newP });
     if (response.error) throw response.error;
-    showToast("Clave actualizada"); location.reload();
+    
+    showToast("Clave actualizada");
+    
+    // INTEGRA: Notificar de forma inmediata a Telegram el éxito del cambio de clave
+    if (currentUserRecovery.telegram_chat_id) {
+        await sendTelegramMessage(currentUserRecovery.telegram_chat_id, `🔑 <b>Cambio de Contraseña Exitoso</b>\n\nTu contraseña de V-Chat ha sido actualizada de forma segura en nuestro sistema.`);
+    }
+    
+    location.reload();
 };
 
 document.getElementById('close-recovery-modal').onclick = () => {
@@ -1051,7 +1119,7 @@ async function autoPurgeStories(statuses) {
 
 async function loadStatuses() {
     // CORREGIDO: Consulta de statuses unificada y limpia de JOINs para evitar PGRST116 (No relation)
-    const { data: statuses, error: sErr = null } = await _supabase
+    const { data: statuses, error: sErr } = await _supabase
         .from('statuses')
         .select('*')
         .order('created_at', { ascending: false });
@@ -1373,7 +1441,7 @@ window.editComment = async (commentId, oldCommentText) => {
     } catch (err) { showToast(err.message, true); }
 };
 
-// CORREGIDO: Solucionada la desestructuración de consulta de eliminación de comentarios (.eq('id', commentId))
+// CORREGIDO: Solucionada la consulta de eliminación de comentarios (.eq('id', commentId))
 window.deleteComment = async (commentId) => {
     if (!confirm("¿Deseas eliminar este comentario?")) return;
     try {
@@ -1583,7 +1651,7 @@ if (localMusicInput) {
                 console.warn("Fallo al sincronizar música local:", err);
             }
         }
-        showToast(`Canción vinculada: ${cleanedSongName}`);
+        showToast("Canción vinculada");
     };
 }
 
@@ -1748,6 +1816,11 @@ async function showApp(user) {
         if (error || !profile) {
             showToast("Error de acceso: Perfil no encontrado.", true);
             return;
+        }
+        
+        // INTEGRA: Control estricto de multicuenta (Sesión Única)
+        if (profile.status === 'online') {
+            showToast("Cerrando sesión activa en otros dispositivos...", true);
         }
         
         currentUser = profile;

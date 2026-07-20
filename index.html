@@ -48,6 +48,9 @@
                     <i class="far fa-envelope"></i>
                     <input type="text" id="login-identifier" placeholder="Usuario o ID V-Chat" required autocomplete="off">
                 </div>
+                
+                <!-- Contenedor dinámico para mostrar la disponibilidad y sugerencia de usuario -->
+                <p id="username-availability-status" style="font-size: 12.5px; margin-top: 4px; display: none; text-align: left; font-weight: 500;"></p>
 
                 <!-- Campo de Contraseña -->
                 <div class="auth-input-group">
@@ -146,7 +149,10 @@
                 <p style="color: var(--text-main); font-weight: bold;">Listado oficial de mejoras y funciones activas en la aplicación:</p>
                 <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 320px; overflow-y: auto;">
                     <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px;">
-                        <li>• <strong>Test de Conexión de Telegram (NUEVO):</strong> Ahora puedes pulsar un botón de prueba al configurar tu ID para comprobar instantáneamente si tu bot de Telegram está listo para enviarte notificaciones.</li>
+                        <li>• <strong>Sugerencia de Nombre de Usuario (NUEVO):</strong> Al registrarte, el sistema validará en tiempo real si el nombre de usuario está ocupado y te sugerirá opciones libres que podrás pulsar para autocompletar.</li>
+                        <li>• <strong>Bloqueo de Seguridad por Intentos (NUEVO):</strong> Si fallas tu contraseña de acceso 3 veces consecutivas, el sistema abrirá automáticamente la pasarela de recuperación de clave para resguardar tu cuenta.</li>
+                        <li>• <strong>Notificación de Cambio de Clave (NUEVO):</strong> Cuando reestablezcas tu contraseña, el bot de Telegram te enviará un aviso inmediato de confirmación de seguridad para evitar accesos no autorizados.</li>
+                        <li>• <strong>Test de Conexión de Telegram:</strong> Ahora puedes pulsar un botón de prueba al configurar tu ID para comprobar instantáneamente si tu bot de Telegram está listo para enviarte notificaciones.</li>
                         <li>• <strong>Recuperación de Contraseña por Telegram:</strong> Ahora puedes solicitar un código OTP único de 6 dígitos que llegará al instante a tu bot de Telegram vinculado para restaurar tu contraseña de forma segura.</li>
                         <li>• <strong>Gestión de Amigos desde Telegram:</strong> Acepta o rechaza solicitudes de amistad al instante haciendo clic en los accesos rápidos embebidos dentro de las notificaciones de tu bot de Telegram.</li>
                         <li>• <strong>Alertas de Interacción de Historias:</strong> Notificación inmediata de comentarios en tus V-Moments, resguardando tu privacidad ya que no se revelarán datos del remitente ni del texto original en el aviso.</li>
@@ -328,7 +334,7 @@
                             </div>
                         </div>
 
-                        <!-- CONTENEDOR PUBLICITARIO DE ADSTERRA RESTABLECIDO NATIVO -->
+                        <!-- CONTENEDOR PUBLICITARIO DE ADSTERRA AISLADO -->
                         <div id="adsterra-banner-container" style="width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:20px; background:var(--sidebar-bg); padding:10px; border-radius:16px; border:1px solid var(--border-light); overflow:hidden; min-height: 70px;">
                             <script type="text/javascript">
                               atOptions = {
