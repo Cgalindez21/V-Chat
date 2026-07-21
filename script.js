@@ -67,7 +67,7 @@ const EMOJI_DATA = {
     "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
     "Actividades": ['🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎁','🏆','🏅','🥇','⚽','⚾','🥎','🏀','🏈','🎾','🎱','🎯','🎮','🕹️','🎰','🎲','🧩','🧸','♠️','♥️','♦️','♣️','♟️','🎨','🎭','🎬'],
     "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','🛶','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
-    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
+    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞','🪟','🛋️','🪑','toilet','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
     "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️']
 };
 
@@ -368,9 +368,68 @@ if (loginIdInput) {
     };
 }
 
+// FUNCIONALIDAD DE BÚSQUEDA Y DETECCION DIRECTA DEL PIN EN EL BUSCADOR
+function filterContactsUI(searchTerm) {
+    const term = searchTerm.toLowerCase();
+    const items = document.querySelectorAll('#contactList .contact-item');
+    items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(term)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
 const searchInput = document.getElementById('search-contacts');
 let lastSearchTap = 0;
+
 if (searchInput) {
+    // Verificar PIN y abrir panel V-Privados
+    const checkPinAndOpenPrivate = () => {
+        if (!currentUser) return false;
+        const val = searchInput.value.trim();
+        const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
+        
+        if (savedPin && val === savedPin) {
+            if (!currentUser.is_premium) {
+                showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
+                return false;
+            }
+            searchInput.value = '';
+            filterContactsUI('');
+            loadPrivateContactsList();
+            togglePanel('private-panel', true);
+            return true;
+        }
+        return false;
+    };
+
+    // Detectar al escribir los 4 dígitos
+    searchInput.addEventListener('input', () => {
+        const val = searchInput.value.trim();
+        if (val.length === 4) {
+            if (checkPinAndOpenPrivate()) return;
+        }
+        filterContactsUI(val);
+    });
+
+    // Detectar al presionar Intro/Enter en teclado móvil
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = searchInput.value.trim();
+            if (checkPinAndOpenPrivate()) return;
+            
+            const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
+            if (savedPin && val.length === 4 && val !== savedPin) {
+                showToast("PIN de seguridad incorrecto.", true);
+            }
+        }
+    });
+
+    // Mantiene también el método alternativo por Doble Toque táctil
     searchInput.onclick = () => {
         const now = Date.now();
         const timespan = now - lastSearchTap;
@@ -1830,7 +1889,6 @@ window.toggleContactPrivacy = (contactId, name) => {
     
     localStorage.setItem(`vchat_private_list_${currentUser.id}`, JSON.stringify(privateList));
     
-    // FORZAR RE-RENDERIZADO INMEDIATO EN LA LISTA PÚBLICA Y PRIVADA
     window.lastContactsSignature = "";
     loadContacts();
     loadPrivateContactsList();
@@ -1886,7 +1944,7 @@ function updatePremiumUI() {
     } else {
         if (adContainer) adContainer.classList.remove('hidden');
         if (planLabel) planLabel.innerHTML = `Plan Gratis`;
-        if (upgradeBtn) upgradeBtn.classList.remove('hidden');
+        if (upgradeBtn) upgradeBtn.remove('hidden');
     }
 }
 
@@ -2134,7 +2192,6 @@ async function loadContacts() {
         const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
         const privateList = JSON.parse(privateListStr);
         
-        // Se añade privateList a la firma para que la pantalla se vuelva a dibujar inmediatamente al ocultar/desocultar
         const signature = JSON.stringify([
             privateList,
             ...contactsData.map(c => {
@@ -2167,7 +2224,6 @@ async function loadContacts() {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact) return;
             
-            // Omite el contacto si está marcado en tu lista de privados
             if (privateList.includes(contact.id)) {
                 return;
             }
@@ -2215,7 +2271,6 @@ async function loadContacts() {
             container.appendChild(item);
         });
 
-        // Evento de doble toque o clic rápido
         contactsData.forEach(c => {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact || privateList.includes(contact.id)) return;
@@ -2228,10 +2283,8 @@ async function loadContacts() {
                     const timespan = now - lastContactTap;
                     
                     if (timespan < 300 && timespan > 0) {
-                        // Doble toque táctil rápido (Ocultar)
                         window.toggleContactPrivacy(contact.id, contact.name);
                     } else {
-                        // Esperar 250ms para confirmar que no es doble toque e iniciar chat normal
                         setTimeout(() => {
                             if (Date.now() - lastContactTap >= 300) {
                                 window.startChat(contact.id, contact.name, contact.avatar_url);
