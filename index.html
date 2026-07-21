@@ -130,13 +130,28 @@
     <div id="device-auth-modal" class="modal-overlay hidden" style="z-index: 10005;">
         <div class="modal-card">
             <h3><i class="fas fa-shield-alt" style="color: var(--vchat-green);"></i> Nuevo Dispositivo Detectado</h3>
-            <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 18px; line-height: 1.5;">
-                Hemos enviado una alerta de seguridad a tu <b>Telegram</b> preguntando si reconoces este acceso. Por favor, escribe a continuación el código de autorización recibido para dar permiso:
-            </p>
-            <div class="input-group">
-                <label>Código de Autorización (6 dígitos)</label>
-                <input type="text" id="device-otp-code" placeholder="Escribe el código recibido por Telegram" autocomplete="off" maxlength="6">
+            
+            <div id="device-otp-view">
+                <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 18px; line-height: 1.5;">
+                    Hemos enviado una alerta de seguridad a tu <b>Telegram</b> preguntando si reconoces este acceso. Por favor, escribe el código de autorización recibido para dar permiso:
+                </p>
+                <div class="input-group">
+                    <label>Código de Autorización (6 dígitos)</label>
+                    <input type="text" id="device-otp-code" placeholder="Escribe el código recibido por Telegram" autocomplete="off" maxlength="6">
+                </div>
             </div>
+
+            <div id="device-question-view" class="hidden">
+                <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 12px; line-height: 1.5;">
+                    No tienes un ID de Telegram vinculado. Para autorizar este nuevo dispositivo, debes responder correctamente a tu pregunta secreta de seguridad:
+                </p>
+                <p id="device-question-label" style="font-size: 13.5px; color: var(--vchat-green); font-weight: bold; margin-bottom: 15px; padding: 12px; background: rgba(0, 191, 165, 0.08); border-radius: 10px; border: 1px solid rgba(0, 191, 165, 0.2);"></p>
+                <div class="input-group">
+                    <label>Tu Respuesta Secreta</label>
+                    <input type="text" id="device-answer-input" placeholder="Ingresa tu respuesta de seguridad" autocomplete="off">
+                </div>
+            </div>
+
             <div class="modal-footer" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
                 <button id="btn-verify-device-otp" class="btn-primary" style="width: 100%;"><i class="fas fa-check-circle"></i> Autorizar e Iniciar Sesión</button>
                 <button id="btn-cancel-device-otp" class="btn-secondary" style="width: 100%;"><i class="fas fa-times"></i> Cancelar</button>
@@ -436,23 +451,25 @@
         </div>
     </div>
 
-    <!-- MODAL AÑADIR CONTACTO -->
+    <!-- MODAL AÑADIR CONTACTO (BÚSQUEDA PÚBLICA EN TIEMPO REAL) -->
     <div id="contact-modal" class="modal-overlay hidden">
-        <div class="modal-card">
+        <div class="modal-card" style="width: 440px; max-height: 85vh; display: flex; flex-direction: column;">
             <h3><i class="fas fa-user-plus"></i> Añadir amigo</h3>
-            <div class="input-group">
-                <label>ID V-Chat o Nombre de Usuario</label>
-                <input type="text" id="new-contact-id" placeholder="Ej: ID-12345 o nombre_usuario" autocomplete="off">
+            <div class="input-group" style="margin-bottom: 12px;">
+                <label>Buscar por Nombre, Usuario o ID V-Chat</label>
+                <input type="text" id="new-contact-id" placeholder="Escribe cualquier letra o nombre..." autocomplete="off">
             </div>
-            <div class="modal-footer">
-                <button id="close-modal" class="btn-secondary">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button id="confirm-add-contact" class="btn-primary">
-                    <i class="fas fa-check"></i> Enviar Solicitud
+            
+            <div id="search-user-results" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; border: 1px solid var(--border-light); border-radius: 12px; padding: 8px; background: var(--chat-bg);">
+                <p style="font-size:12px; color:var(--text-sec); text-align:center; padding:15px 0;">Escribe un nombre o usuario para encontrar personas.</p>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 5px;">
+                <button id="close-modal" class="btn-secondary" style="width: 100%;">
+                    <i class="fas fa-times"></i> Cerrar Ventana
                 </button>
             </div>
-            <p id="modal-error" class="error-msg"></p>
+            <p id="modal-error" class="error-msg" style="color: #ff3b30; font-size: 12px; margin-top: 6px; text-align: center;"></p>
         </div>
     </div>
 

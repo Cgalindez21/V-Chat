@@ -21,14 +21,16 @@ let selectedLocalSongFile = null;
 
 let failedLoginAttempts = 0;
 
-// Variables para OTP de Telegram, Recuperación y Autorización de Dispositivos Nuevos
 let generatedRecoveryCode = null;
 let currentUserRecovery = null;
+
 let pendingDeviceUser = null;
+let pendingDeviceProfile = null;
 let pendingDeviceOtp = null;
 
 let commentStartX = 0;
 let commentCurrentX = 0;
+let searchDebounceTimer = null;
 
 window.addEventListener('touchstart', () => { lastInteractionTime = Date.now(); }, { passive: true });
 window.addEventListener('click', () => { lastInteractionTime = Date.now(); }, { passive: true });
@@ -154,7 +156,23 @@ function initNavigation() {
     
     document.getElementById('requests-btn').onclick = () => togglePanel('requests-panel', true);
     document.getElementById('settings-btn').onclick = () => togglePanel('settings-panel', true);
-    document.getElementById('add-contact-btn').onclick = () => document.getElementById('contact-modal').classList.remove('hidden');
+    
+    const addContactBtn = document.getElementById('add-contact-btn');
+    if (addContactBtn) {
+        addContactBtn.onclick = () => {
+            const modal = document.getElementById('contact-modal');
+            if (modal) modal.classList.remove('hidden');
+            const input = document.getElementById('new-contact-id');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
+            const resultsContainer = document.getElementById('search-user-results');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = `<p style="font-size:12px; color:var(--text-sec); text-align:center; padding:15px 0;">Escribe un nombre o usuario para encontrar personas.</p>`;
+            }
+        };
+    }
 
     document.getElementById('back-requests').onclick = () => togglePanel('requests-panel', false);
     document.getElementById('back-settings').onclick = () => togglePanel('settings-panel', false);
@@ -316,7 +334,7 @@ window.openEmojiPicker = (targetId, isReaction = false) => {
 };
 
 // =======================================================
-// 4. AUTENTICACIÓN Y SEGURIDAD CON 2FA TELEGRAM PARA DISPOSITIVOS NUEVOS
+// 4. AUTENTICACIÓN Y SEGURIDAD
 // =======================================================
 const authForm = document.getElementById('auth-form');
 const toggleLink = document.getElementById('toggle-link');
@@ -511,7 +529,6 @@ authForm.onsubmit = async (e) => {
                 return;
             }
 
-            // AVISO Y BLOQUEO DE SESIÓN DUPICADA EN OTRO DISPOSITIVO
             if (userProfile.status === 'online') {
                 const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
                 if (!storedDeviceId) {
@@ -528,19 +545,35 @@ authForm.onsubmit = async (e) => {
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
             if (response.error) throw response.error;
 
-            // RECONOCIMIENTO DE DISPOSITIVO USADO RECIENTEMENTE O NUEVO
             const knownDeviceToken = localStorage.getItem(`vchat_known_device_token_${userProfile.id}`);
             
-            if (!knownDeviceToken && userProfile.telegram_chat_id) {
+            if (!knownDeviceToken) {
                 pendingDeviceUser = response.data.user;
-                pendingDeviceOtp = Math.floor(100000 + Math.random() * 900000);
+                pendingDeviceProfile = userProfile;
                 
-                showToast("Verificando dispositivo con Telegram...");
-                await sendTelegramMessage(userProfile.telegram_chat_id, `🚨 <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde un <b>NUEVO DISPOSITIVO</b>.\n\n¿Reconoces este acceso?\n\nTu código de autorización es: <b>${pendingDeviceOtp}</b>\n\nIngresa este código de 6 dígitos en V-Chat para dar permiso e ingresar.`);
-                
-                document.getElementById('device-auth-modal').classList.remove('hidden');
-                document.getElementById('device-otp-code').value = '';
-                return;
+                if (userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
+                    pendingDeviceOtp = Math.floor(100000 + Math.random() * 900000);
+                    
+                    document.getElementById('device-otp-view').classList.remove('hidden');
+                    document.getElementById('device-question-view').classList.add('hidden');
+                    document.getElementById('device-otp-code').value = '';
+                    
+                    showToast("Verificando dispositivo con Telegram...");
+                    await sendTelegramMessage(userProfile.telegram_chat_id, `🚨 <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde un <b>NUEVO DISPOSITIVO</b>.\n\n¿Reconoces este acceso?\n\nTu código de autorización es: <b>${pendingDeviceOtp}</b>\n\nIngresa este código de 6 dígitos en V-Chat para dar permiso e ingresar.`);
+                    
+                    document.getElementById('device-auth-modal').classList.remove('hidden');
+                    return;
+                } 
+                else {
+                    document.getElementById('device-otp-view').classList.add('hidden');
+                    document.getElementById('device-question-view').classList.remove('hidden');
+                    document.getElementById('device-question-label').innerText = userProfile.secret_question || "¿Cuál es tu pregunta secreta?";
+                    document.getElementById('device-answer-input').value = '';
+                    
+                    showToast("Autorizando nuevo dispositivo mediante Pregunta Secreta...");
+                    document.getElementById('device-auth-modal').classList.remove('hidden');
+                    return;
+                }
             } else {
                 localStorage.setItem(`vchat_known_device_token_${userProfile.id}`, 'known_' + Date.now());
                 showApp(response.data.user);
@@ -569,24 +602,49 @@ authForm.onsubmit = async (e) => {
     }
 };
 
-// HANDLERS PARA AUTORIZACIÓN DE DISPOSITIVO NUEVO POR TELEGRAM
 const btnVerifyDevice = document.getElementById('btn-verify-device-otp');
 if (btnVerifyDevice) {
     btnVerifyDevice.onclick = async () => {
-        const enteredOtp = document.getElementById('device-otp-code').value.trim();
-        if (enteredOtp === String(pendingDeviceOtp)) {
-            showToast("Dispositivo autorizado con éxito");
-            document.getElementById('device-auth-modal').classList.add('hidden');
-            
-            if (pendingDeviceUser) {
-                localStorage.setItem(`vchat_known_device_token_${pendingDeviceUser.id}`, 'known_' + Date.now());
-                const userToLogIn = pendingDeviceUser;
-                pendingDeviceUser = null;
-                pendingDeviceOtp = null;
-                await showApp(userToLogIn);
+        const otpView = document.getElementById('device-otp-view');
+        const questionView = document.getElementById('device-question-view');
+        
+        if (!otpView.classList.contains('hidden')) {
+            const enteredOtp = document.getElementById('device-otp-code').value.trim();
+            if (enteredOtp === String(pendingDeviceOtp)) {
+                showToast("Dispositivo autorizado con éxito");
+                document.getElementById('device-auth-modal').classList.add('hidden');
+                
+                if (pendingDeviceUser) {
+                    localStorage.setItem(`vchat_known_device_token_${pendingDeviceUser.id}`, 'known_' + Date.now());
+                    const userToLogIn = pendingDeviceUser;
+                    pendingDeviceUser = null;
+                    pendingDeviceProfile = null;
+                    pendingDeviceOtp = null;
+                    await showApp(userToLogIn);
+                }
+            } else {
+                showToast("Código de autorización de Telegram incorrecto.", true);
             }
-        } else {
-            showToast("Código de autorización de Telegram incorrecto.", true);
+        } 
+        else if (!questionView.classList.contains('hidden')) {
+            const enteredAns = document.getElementById('device-answer-input').value.trim().toLowerCase();
+            const realAns = (pendingDeviceProfile && pendingDeviceProfile.secret_answer) ? pendingDeviceProfile.secret_answer.trim().toLowerCase() : '';
+            
+            if (enteredAns && enteredAns === realAns) {
+                showToast("Respuesta correcta. Dispositivo autorizado.");
+                document.getElementById('device-auth-modal').classList.add('hidden');
+                
+                if (pendingDeviceUser) {
+                    localStorage.setItem(`vchat_known_device_token_${pendingDeviceUser.id}`, 'known_' + Date.now());
+                    const userToLogIn = pendingDeviceUser;
+                    pendingDeviceUser = null;
+                    pendingDeviceProfile = null;
+                    pendingDeviceOtp = null;
+                    await showApp(userToLogIn);
+                }
+            } else {
+                showToast("Respuesta secreta incorrecta. No se puede autorizar este dispositivo.", true);
+            }
         }
     };
 }
@@ -596,6 +654,7 @@ if (btnCancelDevice) {
     btnCancelDevice.onclick = async () => {
         document.getElementById('device-auth-modal').classList.add('hidden');
         pendingDeviceUser = null;
+        pendingDeviceProfile = null;
         pendingDeviceOtp = null;
         await _supabase.auth.signOut();
         showToast("Inicio de sesión cancelado");
@@ -1087,56 +1146,121 @@ async function toggleVoiceRecording() {
 }
 
 // =======================================================
-// 6. SOLICITUDES DE AMISTAD (CON ENLACES DE TELEGRAM)
+// 6. BÚSQUEDA PÚBLICA SOCIAL Y SOLICITUDES DE AMISTAD EN TIEMPO REAL
 // =======================================================
-document.getElementById('confirm-add-contact').onclick = async () => {
-    const searchVal = document.getElementById('new-contact-id').value.trim();
-    const errorLabel = document.getElementById('modal-error');
-    errorLabel.innerText = "";
-    
-    if (!searchVal) return;
-    
+const newContactInput = document.getElementById('new-contact-id');
+if (newContactInput) {
+    newContactInput.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        const val = newContactInput.value.trim();
+        const resultsContainer = document.getElementById('search-user-results');
+        if (!resultsContainer) return;
+        
+        if (val.length === 0) {
+            resultsContainer.innerHTML = `<p style="font-size:12px; color:var(--text-sec); text-align:center; padding:15px 0;">Escribe un nombre o usuario para encontrar personas.</p>`;
+            return;
+        }
+        
+        resultsContainer.innerHTML = `<p style="font-size:12px; color:var(--text-sec); text-align:center; padding:15px 0;"><i class="fas fa-spinner fa-spin" style="color:var(--vchat-green);"></i> Buscando usuarios...</p>`;
+        
+        searchDebounceTimer = setTimeout(async () => {
+            try {
+                const { data: searchResults, error: searchErr } = await _supabase
+                    .from('users')
+                    .select('*')
+                    .or(`username.ilike.%${val}%,name.ilike.%${val}%,vchat_id.ilike.%${val}%`)
+                    .neq('id', currentUser.id)
+                    .limit(15);
+                    
+                if (searchErr || !searchResults || searchResults.length === 0) {
+                    resultsContainer.innerHTML = `<p style="font-size:12px; color:var(--text-sec); text-align:center; padding:15px 0;">No se encontraron usuarios coincidentes.</p>`;
+                    return;
+                }
+                
+                const { data: existingRelations } = await _supabase
+                    .from('contacts')
+                    .select('id, sender_id, receiver_id, status')
+                    .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
+                    
+                const relationsMap = {};
+                if (existingRelations) {
+                    existingRelations.forEach(r => {
+                        const partnerId = r.sender_id === currentUser.id ? r.receiver_id : r.sender_id;
+                        relationsMap[partnerId] = r;
+                    });
+                }
+                
+                resultsContainer.innerHTML = searchResults.map(u => {
+                    const relation = relationsMap[u.id];
+                    let actionHtml = '';
+                    
+                    if (relation) {
+                        if (relation.status === 'accepted') {
+                            actionHtml = `<span style="color: var(--vchat-green); font-size: 11.5px; font-weight: bold;"><i class="fas fa-user-check"></i> Amigos</span>`;
+                        } else if (relation.status === 'pending') {
+                            if (relation.sender_id === currentUser.id) {
+                                actionHtml = `<span style="color: var(--text-sec); font-size: 11.5px; font-weight: 500;"><i class="fas fa-clock"></i> Pendiente</span>`;
+                            } else {
+                                actionHtml = `<button onclick="window.respondRequest('${relation.id}', 'accepted'); document.getElementById('contact-modal').classList.add('hidden');" class="btn-primary" style="padding: 6px 12px; font-size: 11.5px;">Aceptar</button>`;
+                            }
+                        }
+                    } else {
+                        actionHtml = `<button onclick="window.sendFriendRequestTo('${u.id}', '${u.name.replace(/'/g, "\\'")}')" class="btn-primary" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 4px;"><i class="fas fa-user-plus"></i> Agregar</button>`;
+                    }
+                    
+                    const avatarSrc = (u.avatar_url && u.avatar_url.trim() !== '') 
+                        ? u.avatar_url 
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=00bfa5&color=fff`;
+
+                    return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid var(--border-light);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${avatarSrc}" class="avatar-sm" alt="Avatar">
+                                <div>
+                                    <strong style="font-size: 13.5px; color: var(--text-main); display: block;">${u.name}</strong>
+                                    <span style="font-size: 11px; color: var(--text-sec);">@${u.username} • ${u.vchat_id}</span>
+                                </div>
+                            </div>
+                            <div>
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (err) {
+                console.error("Error en búsqueda pública:", err);
+                resultsContainer.innerHTML = `<p style="font-size:12px; color:#ff3b30; text-align:center; padding:15px 0;">Error al buscar usuarios.</p>`;
+            }
+        }, 250);
+    });
+}
+
+window.sendFriendRequestTo = async (targetUserId, targetName) => {
     try {
-        const { data: foundUser, error: sErr = null } = await _supabase
-            .from('users')
-            .select('*')
-            .or(`username.eq.${searchVal.toLowerCase()},vchat_id.eq.${searchVal.toUpperCase()}`)
-            .single();
-            
-        if (sErr || !foundUser) {
-            errorLabel.innerText = "Usuario o ID no encontrado.";
-            return;
-        }
-        
-        if (foundUser.id === currentUser.id) {
-            errorLabel.innerText = "No puedes agregarte a ti mismo.";
-            return;
-        }
-        
         const { data: insData, error: insErr } = await _supabase
             .from('contacts')
             .insert([{
                 sender_id: currentUser.id,
-                receiver_id: foundUser.id,
+                receiver_id: targetUserId,
                 status: 'pending'
             }]).select().single();
             
-        if (insErr) {
-            errorLabel.innerText = "Ya tienes una solicitud pendiente o relación.";
-            return;
-        }
+        if (insErr) throw insErr;
         
-        showToast("Solicitud enviada exitosamente");
-        document.getElementById('contact-modal').classList.add('hidden');
-        document.getElementById('new-contact-id').value = "";
+        showToast(`Solicitud enviada a ${targetName}`);
+        
+        if (newContactInput) {
+            newContactInput.dispatchEvent(new Event('input'));
+        }
         
         const appUrl = window.location.origin + window.location.pathname;
         const tgText = `👥 <b>Solicitud de Amistad</b>\n\n¡Has recibido una solicitud de amistad de <b>${currentUser.name}</b>!\n\n` +
                        `👉 <a href="${appUrl}?accept_req=${insData.id}">Aceptar Solicitud</a>\n` +
                        `👉 <a href="${appUrl}?reject_req=${insData.id}">Rechazar Solicitud</a>`;
-        await notifyUserViaTelegram(foundUser.id, tgText);
+        await notifyUserViaTelegram(targetUserId, tgText);
     } catch (err) {
-        errorLabel.innerText = err.message;
+        showToast("No se pudo enviar la solicitud: " + err.message, true);
     }
 };
 
@@ -1915,10 +2039,9 @@ if (testTgBtn) {
     };
 }
 
-// INTEGRACIÓN: Función dinámica para alternar privacidad (Ocultar/Desocultar Contactos)
+// INTEGRACIÓN: Alternar privacidad (Ocultar/Desocultar Contactos para VIP)
 window.toggleContactPrivacy = (contactId, name) => {
     if (!currentUser.is_premium) {
-        showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
         return;
     }
     
@@ -1972,13 +2095,17 @@ function loadPrivateContactsList() {
     }).filter(Boolean);
     
     listContainer.innerHTML = privateContacts.map(contact => {
+        const avatarSrc = (contact.avatar_url && contact.avatar_url.trim() !== '') 
+            ? contact.avatar_url 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=00bfa5&color=fff`;
+
         return `
             <div id="private-item-${contact.id}" class="contact-item" style="display:flex; align-items:center; justify-content:space-between; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.2);" >
-                <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;" onclick="window.startChat('${contact.id}', '${contact.name.replace(/'/g, "\\'")}', '${contact.avatar_url}'); document.getElementById('back-private').click();">
-                    <img src="${contact.avatar_url}" class="avatar-sm">
+                <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;" onclick="window.startChat('${contact.id}', '${contact.name.replace(/'/g, "\\'")}', '${avatarSrc}'); document.getElementById('back-private').click();">
+                    <img src="${avatarSrc}" class="avatar-sm">
                     <div>
                         <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
-                        <p style="font-size:11px; color:var(--vchat-green); margin-top:2px;">Toca para abrir chat</p>
+                        <p style="font-size:11px; color:var(--vchat-green); margin-top:2px;">Toca para abrir chat privado</p>
                     </div>
                 </div>
                 <button onclick="window.toggleContactPrivacy('${contact.id}', '${contact.name.replace(/'/g, "\\'")}')" style="background: rgba(0, 191, 165, 0.15); border: 1px solid var(--vchat-green); color: var(--vchat-green); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;" title="Devolver a lista pública">
@@ -2080,7 +2207,7 @@ async function handleUrlActions() {
 }
 
 // =======================================================
-// 11. INICIALIZACIÓN DE LA APP Y BLOQUEO DE SESIÓN DUPILCADA
+// 11. INICIALIZACIÓN DE LA APP Y BLOQUEO DE SESIÓN DUPLICADA
 // =======================================================
 async function showApp(user) {
     try {
@@ -2308,8 +2435,12 @@ async function loadContacts() {
                 `;
             }
             
+            const avatarSrc = (contact.avatar_url && contact.avatar_url.trim() !== '') 
+                ? contact.avatar_url 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=00bfa5&color=fff`;
+
             const itemHtml = `
-                <img id="contact-avatar-img-${contact.id}" src="${contact.avatar_url}" class="avatar-sm" alt="Avatar">
+                <img id="contact-avatar-img-${contact.id}" src="${avatarSrc}" class="avatar-sm" alt="Avatar">
                 <div style="flex:1;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${contact.name}${vipCrownHtml}</strong>
@@ -2333,33 +2464,22 @@ async function loadContacts() {
             item.style.marginBottom = '6px';
             item.style.transition = 'all 0.2s';
             item.innerHTML = itemHtml;
-            
-            container.appendChild(item);
-        });
 
-        contactsData.forEach(c => {
-            const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
-            if (!contact || privateList.includes(contact.id)) return;
-            
-            const itemDiv = document.getElementById(`contact-item-id-${contact.id}`);
-            if (itemDiv) {
-                let lastContactTap = 0;
-                itemDiv.onclick = (e) => {
-                    const now = Date.now();
-                    const timespan = now - lastContactTap;
-                    
-                    if (timespan < 300 && timespan > 0) {
-                        window.toggleContactPrivacy(contact.id, contact.name);
-                    } else {
-                        setTimeout(() => {
-                            if (Date.now() - lastContactTap >= 300) {
-                                window.startChat(contact.id, contact.name, contact.avatar_url);
-                            }
-                        }, 250);
-                    }
-                    lastContactTap = now;
+            // ABRE EL CHAT INMEDIATAMENTE AL PRESIONAR
+            item.onclick = (e) => {
+                e.stopPropagation();
+                window.startChat(contact.id, contact.name, avatarSrc);
+            };
+
+            // PERMITE OCULTAR ÚNICAMENTE A USUARIOS PREMIUM VIP HACIENDO DOBLE CLIC
+            if (currentUser && currentUser.is_premium) {
+                item.ondblclick = (e) => {
+                    e.stopPropagation();
+                    window.toggleContactPrivacy(contact.id, contact.name);
                 };
             }
+            
+            container.appendChild(item);
         });
 
         nonContactUsers.forEach(u => {
@@ -2377,8 +2497,12 @@ async function loadContacts() {
                 `;
             }
             
+            const avatarSrc = (u.avatar_url && u.avatar_url.trim() !== '') 
+                ? u.avatar_url 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=00bfa5&color=fff`;
+
             const itemHtml = `
-                <img src="${u.avatar_url}" class="avatar-sm" alt="Avatar">
+                <img src="${avatarSrc}" class="avatar-sm" alt="Avatar">
                 <div style="flex:1;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${u.name}${vipCrownHtml}</strong>
@@ -2404,7 +2528,7 @@ async function loadContacts() {
             item.innerHTML = itemHtml;
             
             item.onclick = () => {
-                window.startChat(u.id, u.name, u.avatar_url);
+                window.startChat(u.id, u.name, avatarSrc);
             };
             
             container.appendChild(item);
@@ -2449,7 +2573,7 @@ window.startChat = (id, name, avatar) => {
         if (contactNameLabel) contactNameLabel.innerText = name;
         
         const avatarUi = document.getElementById('target-avatar-ui');
-        if (avatarUi) avatarUi.innerHTML = `<img src="${avatar || 'https://ui-avatars.com/api/?name=' + name}" class="avatar-sm" alt="Avatar">`;
+        if (avatarUi) avatarUi.innerHTML = `<img src="${avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name)}" class="avatar-sm" alt="Avatar">`;
         
         const navbar = document.getElementById('chat-navbar');
         if (navbar && !document.getElementById('clear-chat-btn')) {
