@@ -152,6 +152,14 @@
                 <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 320px; overflow-y: auto;">
                     <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px;">
                         <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-shield"></i> Ocultar Chats Privados (NUEVO - SÓLO VIP)</strong>
+                            • <b>Chats Privados por PIN:</b> Doble clic sobre cualquier contacto para ocultarlo por completo de tus listas y chats públicos. Configura y accede a tu panel secreto de chats ocultos con un código PIN único de 4 dígitos haciendo doble clic sobre el campo de búsqueda de contactos.
+                        </li>
+                        <li>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-crown"></i> Planes y Adquisición</strong>
+                            • <b>VIP Premium (6 Meses):</b> Activación de tu cuenta Premium VIP por un periodo de **6 meses renovables** para remover anuncios, reproducir audio extendido y disfrutar de todos los beneficios de seguridad.
+                        </li>
+                        <li>
                             <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-lock"></i> Cifrado de Mensajes</strong>
                             • <b>Cifrado Extremo a Extremo (E2EE):</b> Los chats de texto ahora se cifran mediante algoritmos criptográficos AES-256 en el dispositivo del remitente y se descifran localmente en el del receptor. La base de datos solo almacena texto cifrado ilegible para absoluta privacidad.
                         </li>
@@ -316,6 +324,21 @@
                     </div>
                 </div>
 
+                <!-- PANEL DE CHATS PRIVADOS (V-PRIVADOS SÓLO PREMIUM) -->
+                <div id="private-panel" class="settings-panel hidden-panel">
+                    <header class="settings-header" style="background: linear-gradient(135deg, #1f2c34, #0b141a); border-bottom: 2px solid var(--vchat-green);">
+                        <button id="back-private">
+                            <i class="fas fa-arrow-left"></i> V-Privados
+                        </button>
+                    </header>
+                    <div class="settings-body">
+                        <p style="font-size: 11.5px; color: var(--text-sec); margin-bottom: 15px; line-height: 1.4;">
+                            <i class="fas fa-user-shield" style="color: var(--vchat-green);"></i> Lista de contactos ocultos de tu cuenta VIP. Doble clic en un contacto aquí para deolverlo a la lista pública.
+                        </p>
+                        <div id="private-contacts-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    </div>
+                </div>
+
                 <!-- BARRA DE BÚSQUEDA -->
                 <div class="search-bar" style="padding: 12px 16px;">
                     <div style="background: var(--input-bg); border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px;">
@@ -357,7 +380,6 @@
 
                         <!-- CONTENEDOR PUBLICITARIO DE ADSTERRA AISLADO CON IFRAME DE REDIRECCIONAMIENTO PROTEGIDO -->
                         <div id="adsterra-banner-container" style="width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:20px; background:var(--sidebar-bg); padding:10px; border-radius:16px; border:1px solid var(--border-light); overflow:hidden; min-height: 70px;">
-                            <!-- El iframe encapsula físicamente el script, atrapando cualquier intento de pantalla completa dentro de su caja de 320x50 -->
                             <iframe id="adsterra-secure-frame" style="width:320px; height:50px; border:none; overflow:hidden;" scrolling="no" srcdoc='
                                 <html style="margin:0; padding:0; overflow:hidden;">
                                 <body style="margin:0; padding:0; overflow:hidden; background:transparent; display:flex; justify-content:center; align-items:center;">
@@ -494,22 +516,23 @@
         </div>
     </div>
 
-    <!-- MODAL ADQUIRIR PREMIUM MULTI-OPCIÓN -->
+    <!-- MODAL ADQUIRIR PREMIUM MULTI-OPCIÓN (SUSCRIPCIÓN SEMESTRAL) -->
     <div id="premium-modal" class="modal-overlay hidden" style="z-index: 10007;">
         <div class="modal-card" style="width: 440px; border-top: 5px solid #ffd700; max-height:85vh; overflow-y:auto;">
             <h3 style="color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.4); margin-bottom: 15px;"><i class="fas fa-crown"></i> Adquirir V-Chat Premium</h3>
-            <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 20px; line-height: 1.5;">Selecciona tu método de pago preferido para activar tu cuenta VIP de por vida y desbloquear todos los beneficios:</p>
+            <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 20px; line-height: 1.5;">Selecciona tu método de pago preferido para activar tu cuenta VIP por un periodo de **6 meses renovables** y desbloquear todos los beneficios:</p>
             
-            <!-- Opción de Pago Internacional (PayPal) -->
+            <!-- Opción de Pago Internacional (PayPal con concepto Semestral) -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); padding: 15px; border-radius: 14px; margin-bottom: 15px;">
                 <h4 style="font-size: 14px; color: #0070ba; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                     <i class="fab fa-paypal"></i> Pago Internacional (PayPal)
                 </h4>
-                <p style="font-size: 12px; color: var(--text-sec); margin-bottom: 12px;">Adquiere tu plan VIP de forma inmediata en dólares americanos utilizando tu saldo o tarjeta en PayPal.</p>
-                <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cgalindez.galindez@gmail.com&item_name=V-Chat%20Premium%20VIP&amount=2.99&currency_code=USD" target="_blank" class="btn-primary" style="background: #0070ba; color: white; text-decoration: none; display: inline-block; width: 100%; text-align: center; font-size: 13px; padding: 11px; border-radius: 10px; font-weight: bold; border:none; box-shadow:none;">Pagar con PayPal</a>
+                <p style="font-size: 12px; color: var(--text-sec); margin-bottom: 12px;">Adquiere tu plan VIP de forma inmediata en dólares americanos por un periodo de 6 meses utilizando tu saldo o tarjeta en PayPal.</p>
+                <!-- Modificado: Concepto de producto especificado como VIP Semestral en PayPal -->
+                <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cgalindez.galindez@gmail.com&item_name=V-Chat%20Premium%20VIP%20Semestral%20(6%20Meses)&amount=2.99&currency_code=USD" target="_blank" class="btn-primary" style="background: #0070ba; color: white; text-decoration: none; display: inline-block; width: 100%; text-align: center; font-size: 13px; padding: 11px; border-radius: 10px; font-weight: bold; border:none; box-shadow:none;">Pagar con PayPal</a>
             </div>
 
-            <!-- Opción de Pago Venezuela (Pago Móvil) -->
+            <!-- Opción de Pago Venezuela (Pago Móvil Semestral) -->
             <div style="background: rgba(0, 191, 165, 0.05); border: 1px solid rgba(0, 191, 165, 0.2); padding: 15px; border-radius: 14px;">
                 <h4 style="font-size: 14px; color: var(--vchat-green); display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                     <i class="fas fa-mobile-alt"></i> Pago en Venezuela (Pago Móvil)
@@ -519,7 +542,7 @@
                     <div>• <b>Banco:</b> Banco de Venezuela (0102)</div>
                     <div>• <b>Teléfono:</b> 0412-1235648</div>
                     <div>• <b>Cédula de Identidad:</b> V-20.447.18</div>
-                    <div>• <b>Monto de referencia:</b> Equivalente a $2.99 USD</div>
+                    <div>• <b>Monto de referencia:</b> Equivalente a $2.99 USD (Válido por 6 meses)</div>
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
@@ -528,7 +551,7 @@
                 </div>
 
                 <p style="font-size: 11px; color: var(--vchat-green); font-style: italic; line-height: 1.3; margin-top:12px;">
-                    * Una vez enviado el reporte por cualquiera de las dos vías, el administrador verificará tu pago y activará tu plan VIP de inmediato.
+                    * Una vez enviado el reporte por cualquiera de las dos vías, el administrador verificará tu pago y activará tu plan VIP semestral de inmediato.
                 </p>
             </div>
 

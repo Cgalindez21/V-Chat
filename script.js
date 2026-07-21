@@ -119,12 +119,10 @@ async function notifyUserViaTelegram(userId, text) {
 // CRIPTOGRAFÍA: CIFRADO SIMÉTRICO DE EXTREMO A EXTREMO (E2EE) AES-256
 // =======================================================
 function getChatSymmetricKey(id1, id2) {
-    // Generar la misma clave única ordenando alfabéticamente ambos UUIDs
     const sortedIds = [id1, id2].sort().join('_');
     return CryptoJS.SHA256(sortedIds).toString();
 }
 
-// Cifra el texto antes de subirlo a la base de datos
 function encryptMessage(plainText, id1, id2) {
     try {
         const key = getChatSymmetricKey(id1, id2);
@@ -134,9 +132,8 @@ function encryptMessage(plainText, id1, id2) {
     }
 }
 
-// Descifra el texto al recibirlo localmente en la app
 function decryptMessage(encryptedText, id1, id2) {
-    if (!encryptedText || !encryptedText.startsWith("ENC:")) return encryptedText; // Compatibilidad con chats viejos
+    if (!encryptedText || !encryptedText.startsWith("ENC:")) return encryptedText;
     try {
         const cleanCipher = encryptedText.substring(4);
         const key = getChatSymmetricKey(id1, id2);
@@ -160,6 +157,7 @@ function initNavigation() {
 
     document.getElementById('back-requests').onclick = () => togglePanel('requests-panel', false);
     document.getElementById('back-settings').onclick = () => togglePanel('settings-panel', false);
+    document.getElementById('back-private').onclick = () => togglePanel('private-panel', false);
 
     document.getElementById('close-modal').onclick = () => {
         document.getElementById('contact-modal').classList.add('hidden');
@@ -373,6 +371,38 @@ if (loginIdInput) {
                 }
             }
         }, 500);
+    };
+}
+
+// INTEGRACIÓN: Acceso mediante PIN al panel de Chats Ocultos privados (Sólo Premium)
+const searchInput = document.getElementById('search-contacts');
+if (searchInput) {
+    searchInput.ondblclick = () => {
+        if (!currentUser) return;
+        if (!currentUser.is_premium) {
+            showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
+            return;
+        }
+        
+        const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
+        if (!savedPin) {
+            const newPin = prompt("Configura tu PIN de seguridad privado de 4 dígitos:");
+            if (!newPin) return;
+            if (newPin.length !== 4 || isNaN(newPin)) {
+                showToast("El PIN debe ser exactamente de 4 dígitos numéricos.", true);
+                return;
+            }
+            localStorage.setItem(`vchat_private_pin_${currentUser.id}`, newPin);
+            showToast("¡PIN privado configurado con éxito!");
+        } else {
+            const enteredPin = prompt("Ingresa tu PIN de acceso privado:");
+            if (enteredPin === savedPin) {
+                loadPrivateContactsList();
+                togglePanel('private-panel', true);
+            } else if (enteredPin !== null) {
+                showToast("PIN de seguridad incorrecto.", true);
+            }
+        }
     };
 }
 
@@ -1171,7 +1201,7 @@ async function autoPurgeStories(statuses) {
 }
 
 async function loadStatuses() {
-    const { data: statuses, error: sErr } = await _supabase
+    const { data: statuses, error: sErr = null } = await _supabase
         .from('statuses')
         .select('*')
         .order('created_at', { ascending: false });
@@ -1768,6 +1798,79 @@ if (testTgBtn) {
     };
 }
 
+// INTEGRACIÓN: Función dinámica para alternar privacidad (Ocultar/Desocultar Contactos)
+window.toggleContactPrivacy = (contactId, name) => {
+    if (!currentUser.is_premium) {
+        showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
+        return;
+    }
+    
+    // CORREGIDO: Si es primera vez, obligar a crear el PIN antes de permitir ocultar el contacto
+    const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
+    if (!savedPin) {
+        const newPin = prompt("Para usar esta función, primero debes configurar tu PIN de seguridad de 4 dígitos:");
+        if (!newPin) return;
+        if (newPin.length !== 4 || isNaN(newPin)) {
+            showToast("El PIN debe ser exactamente de 4 dígitos numéricos.", true);
+            return;
+        }
+        localStorage.setItem(`vchat_private_pin_${currentUser.id}`, newPin);
+        showToast("¡PIN de seguridad configurado con éxito!");
+    }
+    
+    const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
+    let privateList = JSON.parse(privateListStr);
+    
+    if (privateList.includes(contactId)) {
+        // Quitar de lista privada (Hacer público de nuevo)
+        privateList = privateList.filter(id => id !== contactId);
+        showToast(`${name} ahora se muestra en la lista pública`);
+    } else {
+        // Añadir a lista privada (Ocultar de la lista pública)
+        privateList.push(contactId);
+        showToast(`${name} ha sido ocultado en V-Privados con éxito`);
+    }
+    
+    localStorage.setItem(`vchat_private_list_${currentUser.id}`, JSON.stringify(privateList));
+    loadContacts();
+    loadPrivateContactsList();
+};
+
+// Generar lista de contactos privados ocultos en el panel secreto de seguridad
+function loadPrivateContactsList() {
+    const listContainer = document.getElementById('private-contacts-list');
+    if (!listContainer || !currentUser) return;
+    
+    const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
+    const privateList = JSON.parse(privateListStr);
+    
+    if (privateList.length === 0) {
+        listContainer.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:12.5px; margin-top:20px;">No tienes ningún contacto privado oculto.</p>`;
+        return;
+    }
+    
+    // Buscar los contactos reales correspondientes a los IDs guardados de forma privada
+    const privateContacts = globalContacts.map(c => {
+        const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
+        if (contact && privateList.includes(contact.id)) return contact;
+        return null;
+    }).filter(Boolean);
+    
+    listContainer.innerHTML = privateContacts.map(contact => {
+        return `
+            <div class="contact-item" style="display:flex; align-items:center; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.1);" 
+                 onclick="window.startChat('${contact.id}', '${contact.name}', '${contact.avatar_url}'); document.getElementById('back-private').click();"
+                 ondblclick="window.toggleContactPrivacy('${contact.id}', '${contact.name}')">
+                <img src="${contact.avatar_url}" class="avatar-sm">
+                <div>
+                    <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
+                    <p style="font-size:11px; color:var(--vchat-green); margin-top:2px;">Doble clic para desocultar</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 function updatePremiumUI() {
     if (!currentUser) return;
     const planLabel = document.getElementById('settings-plan-label');
@@ -2024,6 +2127,10 @@ async function loadContacts() {
         
         globalContacts = contactsData;
         
+        // Obtener la lista local de contactos marcados como privados/ocultos
+        const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
+        const privateList = JSON.parse(privateListStr);
+        
         const signature = JSON.stringify([
             ...contactsData.map(c => {
                 const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
@@ -2054,6 +2161,11 @@ async function loadContacts() {
         contactsData.forEach(c => {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact) return;
+            
+            // INTEGRA: Si el contacto está en la lista privada, se omite por completo de la barra lateral pública
+            if (privateList.includes(contact.id)) {
+                return;
+            }
             
             const isOnline = window.onlineUsersList && window.onlineUsersList.includes(contact.id);
             const isContactVip = contact.is_premium;
@@ -2096,6 +2208,11 @@ async function loadContacts() {
             
             item.onclick = () => {
                 window.startChat(contact.id, contact.name, contact.avatar_url);
+            };
+            
+            // INTEGRA: El doble clic sobre el contacto público lo ocultará y lo enviará a V-Privados
+            item.ondblclick = () => {
+                window.toggleContactPrivacy(contact.id, contact.name);
             };
             
             container.appendChild(item);
