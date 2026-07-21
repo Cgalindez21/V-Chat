@@ -152,7 +152,7 @@
                 <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 320px; overflow-y: auto;">
                     <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px;">
                         <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-lock"></i> Cifrado de Mensajes (NUEVO)</strong>
+                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-lock"></i> Cifrado de Mensajes</strong>
                             • <b>Cifrado Extremo a Extremo (E2EE):</b> Los chats de texto ahora se cifran mediante algoritmos criptográficos AES-256 en el dispositivo del remitente y se descifran localmente en el del receptor. La base de datos solo almacena texto cifrado ilegible para absoluta privacidad.
                         </li>
                         <li>
@@ -355,18 +355,25 @@
                             </div>
                         </div>
 
-                        <!-- CONTENEDOR PUBLICITARIO DE ADSTERRA AISLADO -->
+                        <!-- CONTENEDOR PUBLICITARIO DE ADSTERRA AISLADO CON IFRAME DE REDIRECCIONAMIENTO PROTEGIDO -->
                         <div id="adsterra-banner-container" style="width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:20px; background:var(--sidebar-bg); padding:10px; border-radius:16px; border:1px solid var(--border-light); overflow:hidden; min-height: 70px;">
-                            <script type="text/javascript">
-                              atOptions = {
-                                'key' : 'ce71424fc983cc29c763e0e5e6d63157',
-                                'format' : 'iframe',
-                                'height' : 50,
-                                'width' : 320,
-                                'params' : {}
-                              };
-                            </script>
-                            <script type="text/javascript" src="https://www.highperformanceformat.com/ce71424fc983cc29c763e0e5e6d63157/invoke.js"></script>
+                            <!-- El iframe encapsula físicamente el script, atrapando cualquier intento de pantalla completa dentro de su caja de 320x50 -->
+                            <iframe id="adsterra-secure-frame" style="width:320px; height:50px; border:none; overflow:hidden;" scrolling="no" srcdoc='
+                                <html style="margin:0; padding:0; overflow:hidden;">
+                                <body style="margin:0; padding:0; overflow:hidden; background:transparent; display:flex; justify-content:center; align-items:center;">
+                                    <script type="text/javascript">
+                                        atOptions = {
+                                            "key" : "ce71424fc983cc29c763e0e5e6d63157",
+                                            "format" : "iframe",
+                                            "height" : 50,
+                                            "width" : 320,
+                                            "params" : {}
+                                        };
+                                    </script>
+                                    <script type="text/javascript" src="https://www.highperformanceformat.com/ce71424fc983cc29c763e0e5e6d63157/invoke.js"></script>
+                                </body>
+                                </html>
+                            '></iframe>
                         </div>
 
                         <!-- BANNER CREAR HISTORIA -->

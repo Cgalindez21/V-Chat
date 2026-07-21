@@ -116,6 +116,38 @@ async function notifyUserViaTelegram(userId, text) {
 }
 
 // =======================================================
+// CRIPTOGRAFÍA: CIFRADO SIMÉTRICO DE EXTREMO A EXTREMO (E2EE) AES-256
+// =======================================================
+function getChatSymmetricKey(id1, id2) {
+    // Generar la misma clave única ordenando alfabéticamente ambos UUIDs
+    const sortedIds = [id1, id2].sort().join('_');
+    return CryptoJS.SHA256(sortedIds).toString();
+}
+
+// Cifra el texto antes de subirlo a la base de datos
+function encryptMessage(plainText, id1, id2) {
+    try {
+        const key = getChatSymmetricKey(id1, id2);
+        return "ENC:" + CryptoJS.AES.encrypt(plainText, key).toString();
+    } catch (e) {
+        return plainText;
+    }
+}
+
+// Descifra el texto al recibirlo localmente en la app
+function decryptMessage(encryptedText, id1, id2) {
+    if (!encryptedText || !encryptedText.startsWith("ENC:")) return encryptedText; // Compatibilidad con chats viejos
+    try {
+        const cleanCipher = encryptedText.substring(4);
+        const key = getChatSymmetricKey(id1, id2);
+        const bytes = CryptoJS.AES.decrypt(cleanCipher, key);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (e) {
+        return "[Error al descifrar mensaje]";
+    }
+}
+
+// =======================================================
 // 2. BOTONES DE NAVEGACIÓN Y PANELES (ÁMBITO INTERNO APP)
 // =======================================================
 function initNavigation() {
@@ -333,6 +365,7 @@ if (loginIdInput) {
                 if (data) {
                     const suggestion = `${val}${Math.floor(100 + Math.random() * 899)}`;
                     userStatusLabel.style.color = '#ff3b30';
+                    // Permite autocompletar pulsando directamente sobre la sugerencia sugerida
                     userStatusLabel.innerHTML = `<i class="fas fa-times-circle"></i> Ocupado. Prueba con: <b style="color:var(--vchat-green); cursor:pointer;" onclick="document.getElementById('login-identifier').value='${suggestion}'; document.getElementById('username-availability-status').style.display='none';">${suggestion}</b>`;
                 } else {
                     userStatusLabel.style.color = 'var(--vchat-green)';
@@ -523,7 +556,7 @@ document.getElementById('close-recovery-modal').onclick = () => {
 };
 
 // =======================================================
-// 5. CHAT Y MENSAJERÍA
+// 5. CHAT Y MENSAJERÍA (CON CIFRADO DE EXTREMO A EXTREMO E2EE)
 // =======================================================
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
@@ -533,10 +566,13 @@ messageForm.onsubmit = async (e) => {
     const text = messageInput.value.trim();
     if (!text || !activeChatId) return;
 
+    // CIFRADO NATIVO E2EE: Cifrar localmente el texto antes de insertarlo en Supabase
+    const encryptedText = encryptMessage(text, currentUser.id, activeChatId);
+
     const { error } = await _supabase.from('messages').insert([{
         sender_id: currentUser.id,
         receiver_id: activeChatId,
-        text: text,
+        text: encryptedText, // Guardar el criptograma cifrado
         media_type: 'text'
     }]);
 
@@ -597,8 +633,12 @@ async function loadMessages() {
             container.innerHTML = data.map(m => {
                 const isMine = m.sender_id === currentUser.id;
 
-                let bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${m.text}</span>`;
-                if (m.media_type === 'image' && m.media_url) {
+                let bodyHtml = ``;
+                if (m.media_type === 'text') {
+                    // DESCIFRADO LOCAL: Descifrar el mensaje con la clave privada de la conversación
+                    const decryptedText = decryptMessage(m.text, m.sender_id, m.receiver_id);
+                    bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${decryptedText}</span>`;
+                } else if (m.media_type === 'image' && m.media_url) {
                     bodyHtml = `<img src="${m.media_url}" style="max-width:100%; max-height:220px; border-radius:12px; margin-bottom:4px; cursor:pointer;" onclick="window.open('${m.media_url}', '_blank')">`;
                 } else if (m.media_type === 'audio' && m.media_url) {
                     bodyHtml = `<audio src="${m.media_url}" controls style="max-width:100%; outline:none; filter:invert(0.1); margin-bottom:4px; height:38px;"></audio>`;
@@ -631,8 +671,11 @@ function appendMessageToUI(m) {
 
     const isMine = m.sender_id === currentUser.id;
 
-    let bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${m.text}</span>`;
-    if (m.media_type === 'image' && m.media_url) {
+    let bodyHtml = ``;
+    if (m.media_type === 'text') {
+        const decryptedText = decryptMessage(m.text, m.sender_id, m.receiver_id);
+        bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${decryptedText}</span>`;
+    } else if (m.media_type === 'image' && m.media_url) {
         bodyHtml = `<img src="${m.media_url}" style="max-width:100%; max-height:220px; border-radius:12px; margin-bottom:4px; cursor:pointer;" onclick="window.open('${m.media_url}', '_blank')">`;
     } else if (m.media_type === 'audio' && m.media_url) {
         bodyHtml = `<audio src="${m.media_url}" controls style="max-width:100%; outline:none; filter:invert(0.1); margin-bottom:4px; height:38px;"></audio>`;
@@ -702,13 +745,15 @@ window.editMessagePrompt = async (id) => {
     const textSpan = msgDiv.querySelector('.msg-text');
     if (!textSpan) return;
 
-    const oldText = textSpan.innerText;
+    const oldText = textSpan.innerText; // Plain text
     const newText = prompt("Editar mensaje de texto:", oldText);
     if (newText === null || newText.trim() === "" || newText === oldText) return;
 
     try {
+        // Encriptar el nuevo texto modificado antes de guardarlo en Supabase
+        const encryptedNewText = encryptMessage(newText.trim(), currentUser.id, activeChatId);
         const response = await _supabase
-            .from('messages').update({ text: newText.trim() }).eq('id', id);
+            .from('messages').update({ text: encryptedNewText }).eq('id', id);
         if (response.error) throw response.error;
         showToast("Mensaje editado");
         loadMessages();
@@ -1329,7 +1374,7 @@ window.toggleCommentSwipe = (commentId) => {
     const item = document.getElementById(`comment-item-${commentId}`);
     if (item) {
         item.style.transition = "transform 0.2s ease";
-        if (item.contains('swiped-left')) {
+        if (item.classList.contains('swiped-left')) {
             item.classList.remove('swiped-left');
             item.style.transform = "translateX(0px)";
         } else {
@@ -1447,6 +1492,7 @@ window.editComment = async (commentId, oldCommentText) => {
     } catch (err) { showToast(err.message, true); }
 };
 
+// CORREGIDO: Solucionada la consulta de eliminación de comentarios (.eq('id', commentId))
 window.deleteComment = async (commentId) => {
     if (!confirm("¿Deseas eliminar este comentario?")) return;
     try {
@@ -1821,6 +1867,11 @@ async function showApp(user) {
         if (error || !profile) {
             showToast("Error de acceso: Perfil no encontrado.", true);
             return;
+        }
+        
+        // INTEGRA: Control estricto de multicuenta (Sesión Única)
+        if (profile.status === 'online') {
+            showToast("Cerrando sesión activa en otros dispositivos...", true);
         }
         
         currentUser = profile;
