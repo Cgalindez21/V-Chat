@@ -67,7 +67,7 @@ const EMOJI_DATA = {
     "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','阱','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
     "Actividades": ['🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎁','🏆','🏅','🥇','⚽','⚾','🥎','🏀','🏈','🎾','🎱','🎯','🎮','🕹️','🎰','🎲','🧩','🧸','♠️','♥️','♦️','♣️','♟️','🎨','🎭','🎬'],
     "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','\uD83D\uDE4F','🛐','\uD83D\uDE4F','🛐','⛵','🛶','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
-    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💍','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','RADIO','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
+    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','RING','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','RADIO','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
     "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦']
 };
 
@@ -363,7 +363,6 @@ if (loginIdInput) {
                 if (data) {
                     const suggestion = `${val}${Math.floor(100 + Math.random() * 899)}`;
                     userStatusLabel.style.color = '#ff3b30';
-                    // Permite autocompletar pulsando directamente sobre la sugerencia sugerida
                     userStatusLabel.innerHTML = `<i class="fas fa-times-circle"></i> Ocupado. Prueba con: <b style="color:var(--vchat-green); cursor:pointer;" onclick="document.getElementById('login-identifier').value='${suggestion}'; document.getElementById('username-availability-status').style.display='none';">${suggestion}</b>`;
                 } else {
                     userStatusLabel.style.color = 'var(--vchat-green)';
@@ -374,35 +373,43 @@ if (loginIdInput) {
     };
 }
 
-// INTEGRACIÓN: Acceso mediante PIN al panel de Chats Ocultos privados (Sólo Premium)
+// CORREGIDO: Detector táctil de doble toque adaptado a teléfonos móviles para la barra de búsqueda
 const searchInput = document.getElementById('search-contacts');
+let lastSearchTap = 0;
 if (searchInput) {
-    searchInput.ondblclick = () => {
-        if (!currentUser) return;
-        if (!currentUser.is_premium) {
-            showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
-            return;
-        }
+    searchInput.onclick = () => {
+        const now = Date.now();
+        const timespan = now - lastSearchTap;
         
-        const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
-        if (!savedPin) {
-            const newPin = prompt("Configura tu PIN de seguridad privado de 4 dígitos:");
-            if (!newPin) return;
-            if (newPin.length !== 4 || isNaN(newPin)) {
-                showToast("El PIN debe ser exactamente de 4 dígitos numéricos.", true);
+        if (timespan < 350 && timespan > 0) {
+            // Doble toque táctil detectado con éxito
+            if (!currentUser) return;
+            if (!currentUser.is_premium) {
+                showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
                 return;
             }
-            localStorage.setItem(`vchat_private_pin_${currentUser.id}`, newPin);
-            showToast("¡PIN privado configurado con éxito!");
-        } else {
-            const enteredPin = prompt("Ingresa tu PIN de acceso privado:");
-            if (enteredPin === savedPin) {
-                loadPrivateContactsList();
-                togglePanel('private-panel', true);
-            } else if (enteredPin !== null) {
-                showToast("PIN de seguridad incorrecto.", true);
+            
+            const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
+            if (!savedPin) {
+                const newPin = prompt("Configura tu PIN de seguridad privado de 4 dígitos:");
+                if (!newPin) return;
+                if (newPin.length !== 4 || isNaN(newPin)) {
+                    showToast("El PIN debe ser exactamente de 4 dígitos numéricos.", true);
+                    return;
+                }
+                localStorage.setItem(`vchat_private_pin_${currentUser.id}`, newPin);
+                showToast("¡PIN privado configurado con éxito!");
+            } else {
+                const enteredPin = prompt("Ingresa tu PIN de acceso privado:");
+                if (enteredPin === savedPin) {
+                    loadPrivateContactsList();
+                    togglePanel('private-panel', true);
+                } else if (enteredPin !== null) {
+                    showToast("PIN de seguridad incorrecto.", true);
+                }
             }
         }
+        lastSearchTap = now;
     };
 }
 
@@ -443,7 +450,6 @@ authForm.onsubmit = async (e) => {
                 }
             }
 
-            // CORREGIDO: Bloqueo estricto de inicio de sesión múltiple antes de conceder la autorización
             const { data: userProfile, error: profileErr } = await _supabase
                 .from('users')
                 .select('id, status')
@@ -758,7 +764,7 @@ window.showMsgActionSheet = (msgId, mediaType) => {
 };
 
 window.deleteSingleMessage = async (id) => {
-    if (!confirm("¿Deseas eliminar permanentemente este mensaje?")) return;
+    if (!confirm("¿Deseas de verdad eliminar permanentemente este mensaje?")) return;
     try {
         const response = await _supabase.from('messages').delete().eq('id', id);
         if (response.error) throw response.error;
@@ -1201,7 +1207,7 @@ async function autoPurgeStories(statuses) {
 }
 
 async function loadStatuses() {
-    const { data: statuses, error: sErr = null } = await _supabase
+    const { data: statuses, error: sErr } = await _supabase
         .from('statuses')
         .select('*')
         .order('created_at', { ascending: false });
@@ -1836,7 +1842,7 @@ window.toggleContactPrivacy = (contactId, name) => {
     loadPrivateContactsList();
 };
 
-// Generar lista de contactos privados ocultos en el panel secreto de seguridad
+// Generar lista de contactos privados ocultos en el panel secreto de seguridad con soporte multitáctil rápido
 function loadPrivateContactsList() {
     const listContainer = document.getElementById('private-contacts-list');
     if (!listContainer || !currentUser) return;
@@ -1858,9 +1864,7 @@ function loadPrivateContactsList() {
     
     listContainer.innerHTML = privateContacts.map(contact => {
         return `
-            <div class="contact-item" style="display:flex; align-items:center; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.1);" 
-                 onclick="window.startChat('${contact.id}', '${contact.name}', '${contact.avatar_url}'); document.getElementById('back-private').click();"
-                 ondblclick="window.toggleContactPrivacy('${contact.id}', '${contact.name}')">
+            <div id="private-item-${contact.id}" class="contact-item" style="display:flex; align-items:center; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.1);" >
                 <img src="${contact.avatar_url}" class="avatar-sm">
                 <div>
                     <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
@@ -1869,6 +1873,29 @@ function loadPrivateContactsList() {
             </div>
         `;
     }).join('');
+
+    // CORREGIDO: Vincular el detector rápido de toque y doble toque en móviles para la lista de privados
+    privateContacts.forEach(contact => {
+        const itemDiv = document.getElementById(`private-item-${contact.id}`);
+        if (itemDiv) {
+            let lastPrivateTap = 0;
+            itemDiv.onclick = (e) => {
+                const now = Date.now();
+                const timespan = now - lastPrivateTap;
+                if (timespan < 300 && timespan > 0) {
+                    window.toggleContactPrivacy(contact.id, contact.name);
+                } else {
+                    setTimeout(() => {
+                        if (Date.now() - lastPrivateTap >= 300) {
+                            window.startChat(contact.id, contact.name, contact.avatar_url);
+                            document.getElementById('back-private').click();
+                        }
+                    }, 250);
+                }
+                lastPrivateTap = now;
+            };
+        }
+    });
 }
 
 function updatePremiumUI() {
@@ -2182,7 +2209,7 @@ async function loadContacts() {
             }
             
             const itemHtml = `
-                <img src="${contact.avatar_url}" class="avatar-sm" alt="Avatar">
+                <img id="contact-avatar-img-${contact.id}" src="${contact.avatar_url}" class="avatar-sm" alt="Avatar">
                 <div style="flex:1;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${contact.name}${vipCrownHtml}</strong>
@@ -2196,6 +2223,7 @@ async function loadContacts() {
             
             const item = document.createElement('div');
             item.className = 'contact-item';
+            item.id = `contact-item-id-${contact.id}`; // Añadido ID para asociar eventos táctiles
             item.style.display = 'flex';
             item.style.alignItems = 'center';
             item.style.gap = '15px';
@@ -2206,16 +2234,35 @@ async function loadContacts() {
             item.style.transition = 'all 0.2s';
             item.innerHTML = itemHtml;
             
-            item.onclick = () => {
-                window.startChat(contact.id, contact.name, contact.avatar_url);
-            };
-            
-            // INTEGRA: El doble clic sobre el contacto público lo ocultará y lo enviará a V-Privados
-            item.ondblclick = () => {
-                window.toggleContactPrivacy(contact.id, contact.name);
-            };
-            
             container.appendChild(item);
+        });
+
+        // CORREGIDO: Vincular el detector rápido de toque y doble toque en móviles para la lista pública
+        contactsData.forEach(c => {
+            const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
+            if (!contact || privateList.includes(contact.id)) return;
+            
+            const itemDiv = document.getElementById(`contact-item-id-${contact.id}`);
+            if (itemDiv) {
+                let lastContactTap = 0;
+                itemDiv.onclick = (e) => {
+                    const now = Date.now();
+                    const timespan = now - lastContactTap;
+                    
+                    if (timespan < 300 && timespan > 0) {
+                        // Doble toque táctil rápido (Ocultar)
+                        window.toggleContactPrivacy(contact.id, contact.name);
+                    } else {
+                        // Esperar 250ms para confirmar que no es doble toque e iniciar chat normal
+                        setTimeout(() => {
+                            if (Date.now() - lastContactTap >= 300) {
+                                window.startChat(contact.id, contact.name, contact.avatar_url);
+                            }
+                        }, 250);
+                    }
+                    lastContactTap = now;
+                };
+            }
         });
 
         nonContactUsers.forEach(u => {
