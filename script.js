@@ -19,12 +19,13 @@ let audioChunks = [];
 let recordTimer = null;
 let selectedLocalSongFile = null;
 
-// Control de intentos fallidos de inicio de sesión
 let failedLoginAttempts = 0;
 
-// Variables para OTP de Telegram y Recuperación Temporal
+// Variables para OTP de Telegram, Recuperación y Autorización de Dispositivos Nuevos
 let generatedRecoveryCode = null;
 let currentUserRecovery = null;
+let pendingDeviceUser = null;
+let pendingDeviceOtp = null;
 
 let commentStartX = 0;
 let commentCurrentX = 0;
@@ -45,6 +46,7 @@ document.addEventListener('visibilitychange', async () => {
 
 window.addEventListener('beforeunload', () => {
     if (currentUser) {
+        localStorage.removeItem(`vchat_device_id_${currentUser.id}`);
         const url = `${SUPABASE_URL}/rest/v1/users?id=eq.${currentUser.id}`;
         const payload = JSON.stringify({ status: 'offline' });
         const headers = {
@@ -199,6 +201,7 @@ function initNavigation() {
     document.getElementById('logout-btn').onclick = async () => {
         if (currentUser) {
             try {
+                localStorage.removeItem(`vchat_device_id_${currentUser.id}`);
                 await _supabase.from('users').update({ status: 'offline' }).eq('id', currentUser.id);
             } catch (e) {
                 console.warn(e);
@@ -313,7 +316,7 @@ window.openEmojiPicker = (targetId, isReaction = false) => {
 };
 
 // =======================================================
-// 4. AUTENTICACIÓN Y RECUPERACIÓN
+// 4. AUTENTICACIÓN Y SEGURIDAD CON 2FA TELEGRAM PARA DISPOSITIVOS NUEVOS
 // =======================================================
 const authForm = document.getElementById('auth-form');
 const toggleLink = document.getElementById('toggle-link');
@@ -368,7 +371,6 @@ if (loginIdInput) {
     };
 }
 
-// FUNCIONALIDAD DE BÚSQUEDA Y DETECCION DIRECTA DEL PIN EN EL BUSCADOR
 function filterContactsUI(searchTerm) {
     const term = searchTerm.toLowerCase();
     const items = document.querySelectorAll('#contactList .contact-item');
@@ -386,7 +388,6 @@ const searchInput = document.getElementById('search-contacts');
 let lastSearchTap = 0;
 
 if (searchInput) {
-    // Verificar PIN y abrir panel V-Privados
     const checkPinAndOpenPrivate = () => {
         if (!currentUser) return false;
         const val = searchInput.value.trim();
@@ -406,7 +407,6 @@ if (searchInput) {
         return false;
     };
 
-    // Detectar al escribir los 4 dígitos
     searchInput.addEventListener('input', () => {
         const val = searchInput.value.trim();
         if (val.length === 4) {
@@ -415,7 +415,6 @@ if (searchInput) {
         filterContactsUI(val);
     });
 
-    // Detectar al presionar Intro/Enter en teclado móvil
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -429,7 +428,6 @@ if (searchInput) {
         }
     });
 
-    // Mantiene también el método alternativo por Doble Toque táctil
     searchInput.onclick = () => {
         const now = Date.now();
         const timespan = now - lastSearchTap;
@@ -504,20 +502,49 @@ authForm.onsubmit = async (e) => {
 
             const { data: userProfile, error: profileErr } = await _supabase
                 .from('users')
-                .select('id, status')
+                .select('*')
                 .eq('username', iden)
                 .maybeSingle();
 
-            if (!profileErr && userProfile && userProfile.status === 'online') {
-                throw new Error("Esta cuenta ya tiene una sesión activa en otro dispositivo. Cierra la sesión en el otro equipo antes de iniciar aquí.");
+            if (profileErr || !userProfile) {
+                showToast("Usuario o contraseña incorrectos. Por favor, verifica tus datos.", true);
+                return;
+            }
+
+            // AVISO Y BLOQUEO DE SESIÓN DUPICADA EN OTRO DISPOSITIVO
+            if (userProfile.status === 'online') {
+                const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
+                if (!storedDeviceId) {
+                    showToast("Tienes una sesión activa en otro dispositivo. Te invitamos a cerrar la sesión en el equipo donde la tengas abierta para ingresar aquí.", true);
+                    
+                    if (userProfile.telegram_chat_id) {
+                        await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde otro equipo mientras mantienes tu sesión abierta.`);
+                    }
+                    return;
+                }
             }
 
             const email = `${iden}@vchat.app`;
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
-            
             if (response.error) throw response.error;
+
+            // RECONOCIMIENTO DE DISPOSITIVO USADO RECIENTEMENTE O NUEVO
+            const knownDeviceToken = localStorage.getItem(`vchat_known_device_token_${userProfile.id}`);
             
-            showApp(response.data.user);
+            if (!knownDeviceToken && userProfile.telegram_chat_id) {
+                pendingDeviceUser = response.data.user;
+                pendingDeviceOtp = Math.floor(100000 + Math.random() * 900000);
+                
+                showToast("Verificando dispositivo con Telegram...");
+                await sendTelegramMessage(userProfile.telegram_chat_id, `🚨 <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde un <b>NUEVO DISPOSITIVO</b>.\n\n¿Reconoces este acceso?\n\nTu código de autorización es: <b>${pendingDeviceOtp}</b>\n\nIngresa este código de 6 dígitos en V-Chat para dar permiso e ingresar.`);
+                
+                document.getElementById('device-auth-modal').classList.remove('hidden');
+                document.getElementById('device-otp-code').value = '';
+                return;
+            } else {
+                localStorage.setItem(`vchat_known_device_token_${userProfile.id}`, 'known_' + Date.now());
+                showApp(response.data.user);
+            }
         }
     } catch (err) { 
         let friendlyMsg = err.message;
@@ -541,6 +568,39 @@ authForm.onsubmit = async (e) => {
         showToast(friendlyMsg, true); 
     }
 };
+
+// HANDLERS PARA AUTORIZACIÓN DE DISPOSITIVO NUEVO POR TELEGRAM
+const btnVerifyDevice = document.getElementById('btn-verify-device-otp');
+if (btnVerifyDevice) {
+    btnVerifyDevice.onclick = async () => {
+        const enteredOtp = document.getElementById('device-otp-code').value.trim();
+        if (enteredOtp === String(pendingDeviceOtp)) {
+            showToast("Dispositivo autorizado con éxito");
+            document.getElementById('device-auth-modal').classList.add('hidden');
+            
+            if (pendingDeviceUser) {
+                localStorage.setItem(`vchat_known_device_token_${pendingDeviceUser.id}`, 'known_' + Date.now());
+                const userToLogIn = pendingDeviceUser;
+                pendingDeviceUser = null;
+                pendingDeviceOtp = null;
+                await showApp(userToLogIn);
+            }
+        } else {
+            showToast("Código de autorización de Telegram incorrecto.", true);
+        }
+    };
+}
+
+const btnCancelDevice = document.getElementById('btn-cancel-device-otp');
+if (btnCancelDevice) {
+    btnCancelDevice.onclick = async () => {
+        document.getElementById('device-auth-modal').classList.add('hidden');
+        pendingDeviceUser = null;
+        pendingDeviceOtp = null;
+        await _supabase.auth.signOut();
+        showToast("Inicio de sesión cancelado");
+    };
+}
 
 document.getElementById('forgot-password-link').onclick = () => {
     document.getElementById('recovery-modal').classList.remove('hidden');
@@ -1878,11 +1938,9 @@ window.toggleContactPrivacy = (contactId, name) => {
     let privateList = JSON.parse(privateListStr);
     
     if (privateList.includes(contactId)) {
-        // Quitar de lista privada (Hacer público de nuevo)
         privateList = privateList.filter(id => id !== contactId);
         showToast(`${name} ahora se muestra en la lista pública`);
     } else {
-        // Añadir a lista privada (Ocultar de la lista pública)
         privateList.push(contactId);
         showToast(`${name} ha sido ocultado en V-Privados con éxito`);
     }
@@ -1944,7 +2002,7 @@ function updatePremiumUI() {
     } else {
         if (adContainer) adContainer.classList.remove('hidden');
         if (planLabel) planLabel.innerHTML = `Plan Gratis`;
-        if (upgradeBtn) upgradeBtn.remove('hidden');
+        if (upgradeBtn) upgradeBtn.classList.remove('hidden');
     }
 }
 
@@ -2022,7 +2080,7 @@ async function handleUrlActions() {
 }
 
 // =======================================================
-// 11. INICIALIZACIÓN DE LA APP
+// 11. INICIALIZACIÓN DE LA APP Y BLOQUEO DE SESIÓN DUPILCADA
 // =======================================================
 async function showApp(user) {
     try {
@@ -2033,8 +2091,17 @@ async function showApp(user) {
             return;
         }
         
-        if (profile.status === 'online') {
-            showToast("Cerrando sesión activa en otros dispositivos...", true);
+        let localDeviceId = localStorage.getItem(`vchat_device_id_${user.id}`);
+        
+        if (profile.status === 'online' && !localDeviceId) {
+            showToast("Tienes una sesión activa en otro dispositivo. Te invitamos a cerrar la sesión en el equipo donde la tengas abierta para ingresar aquí.", true);
+            await _supabase.auth.signOut();
+            return;
+        }
+        
+        if (!localDeviceId) {
+            localDeviceId = 'device_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+            localStorage.setItem(`vchat_device_id_${user.id}`, localDeviceId);
         }
         
         currentUser = profile;
@@ -2188,7 +2255,6 @@ async function loadContacts() {
         
         globalContacts = contactsData;
         
-        // Obtener la lista local de contactos marcados como privados/ocultos
         const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
         const privateList = JSON.parse(privateListStr);
         

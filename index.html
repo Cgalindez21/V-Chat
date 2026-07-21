@@ -10,16 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Biblioteca criptográfica CryptoJS integrada para cifrado de extremo a extremo -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
 
-    <!-- PANTALLA DE ACCESO / LOGIN (REDISEÑO DE ALTA FIDELIDAD) -->
+    <!-- PANTALLA DE ACCESO / LOGIN -->
     <div id="auth-screen" class="auth-overlay">
         <div class="auth-card">
             <div class="auth-logo-container">
-                <!-- Logotipo vectorial premium V-Chat (SVG) -->
                 <svg viewBox="0 0 100 100" width="85" height="85" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -39,28 +37,23 @@
             <p style="color: rgba(255,255,255,0.7); font-size: 14.5px; margin-bottom: 25px; font-weight: 500;">Tu red social y mensajería privada segura</p>
             
             <form id="auth-form" class="auth-form">
-                <!-- Campo de Nombre completo (Visible solo en Registro) -->
                 <div class="auth-input-group" id="reg-name-group" style="display: none;">
                     <i class="far fa-user"></i>
                     <input type="text" id="reg-name" placeholder="Nombre completo" autocomplete="off">
                 </div>
 
-                <!-- Campo de Usuario o ID -->
                 <div class="auth-input-group">
                     <i class="far fa-envelope"></i>
                     <input type="text" id="login-identifier" placeholder="Usuario o ID V-Chat" required autocomplete="off">
                 </div>
                 
-                <!-- Contenedor dinámico para mostrar la disponibilidad y sugerencia de usuario -->
                 <p id="username-availability-status" style="font-size: 12.5px; margin-top: 4px; display: none; text-align: left; font-weight: 500;"></p>
 
-                <!-- Campo de Contraseña -->
                 <div class="auth-input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="reg-password" placeholder="Contraseña" required autocomplete="off">
                 </div>
                 
-                <!-- Campos de pregunta secreta para registro -->
                 <div id="register-recovery-fields" style="display: none; flex-direction: column; gap: 12px; text-align: left; margin-top: 4px;">
                     <label style="font-size: 11px; color: var(--vchat-green); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Pregunta de recuperación:</label>
                     <select id="reg-secret-question" style="padding: 14px 20px; background: rgba(11, 20, 26, 0.8); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%;">
@@ -84,7 +77,7 @@
             <p id="forgot-password-link" class="toggle-text" style="margin-top: 12px; font-size: 13.5px; opacity: 0.85;">¿Olvidé mi contraseña?</p>
             
             <p class="app-version" style="margin-top: 25px;" id="app-version-label">
-                <i class="fas fa-shield-alt"></i> V-Chat v1.2.0 | Historias y Mensajería Privada
+                <i class="fas fa-shield-alt"></i> V-Chat v1.1.0 | Historias y Mensajería Privada
             </p>
         </div>
     </div>
@@ -94,21 +87,18 @@
         <div class="modal-card">
             <h3><i class="fas fa-key"></i> Recuperar Contraseña</h3>
             
-            <!-- Paso 1: Identificación -->
             <div id="recovery-step-1" class="input-group">
                 <label>Ingresa tu Usuario o ID V-Chat</label>
-                <input type="text" id="recovery-identifier" placeholder="Ej: nombre_usuario o VCHAT-XXXX" autocomplete="off">
+                <input type="text" id="recovery-identifier" placeholder="Ej: nombre_usuario o ID-12345" autocomplete="off">
                 <button id="btn-recovery-next" class="btn-primary" style="width: 100%; margin-top: 15px;">Siguiente</button>
             </div>
 
-            <!-- Paso 1.5: Selección de método de recuperación -->
             <div id="recovery-method-select" class="input-group hidden" style="display: flex; flex-direction: column; gap: 10px;">
                 <label>Selecciona tu método preferido:</label>
                 <button id="btn-method-question" class="btn-primary" style="width: 100%;"><i class="far fa-question-circle"></i> Pregunta Secreta</button>
                 <button id="btn-method-telegram" class="btn-primary" style="width: 100%; background: #0088cc; box-shadow: none;"><i class="fab fa-telegram-plane"></i> Código OTP de Telegram</button>
             </div>
             
-            <!-- Paso 2A: Pregunta Secreta -->
             <div id="recovery-step-2" class="input-group hidden">
                 <p id="recovery-question-text" style="color: var(--text-main); margin-bottom: 15px; font-weight: bold;"></p>
                 <label>Tu Respuesta Secreta</label>
@@ -116,14 +106,12 @@
                 <button id="btn-recovery-verify" class="btn-primary" style="width: 100%; margin-top: 15px;">Verificar respuesta</button>
             </div>
 
-            <!-- Paso 2B: Código de Telegram -->
             <div id="recovery-step-2b" class="input-group hidden">
                 <label>Código de verificación de Telegram</label>
                 <input type="text" id="recovery-telegram-code" placeholder="Escribe el código de 6 dígitos recibido" autocomplete="off">
                 <button id="btn-recovery-verify-tg" class="btn-primary" style="width: 100%; margin-top: 15px;">Verificar código</button>
             </div>
             
-            <!-- Paso 3: Nueva Contraseña -->
             <div id="recovery-step-3" class="input-group hidden">
                 <label>Nueva Contraseña</label>
                 <input type="password" id="recovery-new-password" placeholder="Escribe tu nueva contraseña" autocomplete="off">
@@ -138,64 +126,69 @@
         </div>
     </div>
 
-    <!-- MODAL INFORMATIVO DE NOVEDADES -->
+    <!-- MODAL DE AUTORIZACIÓN DE NUEVO DISPOSITIVO -->
+    <div id="device-auth-modal" class="modal-overlay hidden" style="z-index: 10005;">
+        <div class="modal-card">
+            <h3><i class="fas fa-shield-alt" style="color: var(--vchat-green);"></i> Nuevo Dispositivo Detectado</h3>
+            <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 18px; line-height: 1.5;">
+                Hemos enviado una alerta de seguridad a tu <b>Telegram</b> preguntando si reconoces este acceso. Por favor, escribe a continuación el código de autorización recibido para dar permiso:
+            </p>
+            <div class="input-group">
+                <label>Código de Autorización (6 dígitos)</label>
+                <input type="text" id="device-otp-code" placeholder="Escribe el código recibido por Telegram" autocomplete="off" maxlength="6">
+            </div>
+            <div class="modal-footer" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <button id="btn-verify-device-otp" class="btn-primary" style="width: 100%;"><i class="fas fa-check-circle"></i> Autorizar e Iniciar Sesión</button>
+                <button id="btn-cancel-device-otp" class="btn-secondary" style="width: 100%;"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INFORMATIVO DE V-NOVEDADES -->
     <div id="changelog-modal" class="modal-overlay hidden" style="z-index: 10003;">
         <div class="modal-card" style="width: 460px; border-left: 5px solid var(--vchat-green);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0; color: var(--text-main); font-size: 22px; font-weight: bold;">
-                    <i class="fas fa-info-circle" style="color: var(--vchat-green); margin-right: 8px;"></i> Funciones de V-Chat
+                    <i class="fas fa-bullhorn" style="color: var(--vchat-green); margin-right: 8px;"></i> V-Novedades
                 </h3>
-                <span style="font-size: 11px; background: rgba(0, 191, 165, 0.15); color: var(--vchat-green); padding: 4px 8px; border-radius: 12px; font-weight: bold;">v1.2.0</span>
+                <span style="font-size: 11px; background: rgba(0, 191, 165, 0.15); color: var(--vchat-green); padding: 4px 8px; border-radius: 12px; font-weight: bold;">v1.1.0</span>
             </div>
             <div style="color: var(--text-sec); font-size: 14px; line-height: 1.6; display: flex; flex-direction: column; gap: 14px;">
-                <p style="color: var(--text-main); font-weight: bold;">Manual oficial de capacidades y funciones activas en la aplicación:</p>
-                <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 320px; overflow-y: auto;">
-                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px;">
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-shield"></i> Ocultar Chats Privados (NUEVO - SÓLO VIP)</strong>
-                            • <b>Chats Privados por PIN:</b> Doble clic sobre cualquier contacto para ocultarlo por completo de tus listas y chats públicos. Configura y accede a tu panel secreto de chats ocultos con un código PIN único de 4 dígitos haciendo doble clic sobre el campo de búsqueda de contactos.
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-crown"></i> Planes y Adquisición</strong>
-                            • <b>VIP Premium (6 Meses):</b> Activación de tu cuenta Premium VIP por un periodo de **6 meses renovables** para remover anuncios, reproducir audio extendido y disfrutar de todos los beneficios de seguridad.
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-user-lock"></i> Cifrado de Mensajes</strong>
-                            • <b>Cifrado Extremo a Extremo (E2EE):</b> Los chats de texto ahora se cifran mediante algoritmos criptográficos AES-256 en el dispositivo del remitente y se descifran localmente en el del receptor. La base de datos solo almacena texto cifrado ilegible para absoluta privacidad.
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-shield-alt"></i> Seguridad y Acceso</strong>
-                            • <b>Sesión Única Estricta:</b> Bloqueo físico de inicio de sesión múltiple para proteger las cuentas de accesos simultáneos no autorizados.<br>
-                            • <b>Prevención de Intentos:</b> Bloqueo temporal automático y redirección a recuperación tras fallar 3 veces la clave de acceso.<br>
-                            • <b>Doble Recuperación:</b> Recuperación de contraseña por Pregunta Secreta o mediante Código OTP único de Telegram.
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-comments"></i> Mensajería Privada</strong>
-                            • <b>Mensajes Multimedia:</b> Envío de mensajes de texto, fotos de alta calidad y notas de voz con interfaz integrada.<br>
-                            • <b>Control Total:</b> Edición de mensajes enviados, eliminación definitiva del servidor y vaciado completo de conversaciones privadas.<br>
-                            • <b>Confirmación de Lectura:</b> Indicadores visuales de envío (un tick), entrega (doble tick gris) y lectura (doble tick verde).
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-photo-video"></i> V-Moments (Historias)</strong>
-                            • <b>Publicaciones Verticales:</b> Comparte fotos, videos (hasta 3 min en cuentas gratis y 10 min en VIP) o canciones de tu teléfono.<br>
-                            • <b>Auto-Eliminación:</b> Depuración bi-direccional y purga automática de historias del servidor tras cumplirse las 24 horas.<br>
-                            • <b>Comentarios y Reacciones:</b> Reacciona con emojis, comenta historias y usa el atajo "Swipe" (deslizar) para responder rápido mencionando al usuario con la etiqueta estilizada <b>@usuario</b>.
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fas fa-music"></i> Sincronización Musical</strong>
-                            • <b>V-Music de Perfil:</b> Vincula un archivo de audio local para mostrar de forma dinámica tu estado "Escuchando: [Canción]" en la lista de amigos.<br>
-                            • <b>V-Player de Historias:</b> Comparte tus canciones en los V-Moments con un reproductor de audio integrado para tus contactos.
-                        </li>
-                        <li>
-                            <strong style="color: var(--vchat-green); display: block; margin-bottom: 4px;"><i class="fab fa-telegram-plane"></i> Integración con Telegram</strong>
-                            • <b>Notificaciones de Alerta:</b> Recibe avisos en Telegram de tus mensajes y comentarios resguardando tu privacidad (sin detallar contenido).<br>
-                            • <b>Gestión Amistad desde Telegram:</b> Acepta o rechaza solicitudes de amistad directamente mediante botones y enlaces rápidos en tus chats.
-                        </li>
-                    </ul>
+                <p style="color: var(--text-main); font-weight: bold;">Manual de funciones según el tipo de cuenta:</p>
+                <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 340px; overflow-y: auto;">
+                    
+                    <div style="margin-bottom: 18px;">
+                        <h4 style="color: var(--vchat-green); font-size: 13.5px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(0,191,165,0.2); padding-bottom: 4px;">
+                            <i class="fas fa-gift"></i> 🆓 FUNCIONES GRATUITAS (FREE)
+                        </h4>
+                        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px;">
+                            <li>• <b>Mensajería Cifrada (E2EE):</b> Chats privados protegidos con cifrado AES-256 de extremo a extremo.</li>
+                            <li>• <b>Envío Multimedia:</b> Transmisión de mensajes de texto, fotos de alta calidad y notas de voz.</li>
+                            <li>• <b>Confirmación de Lectura:</b> Indicadores visuales de estado (Enviado, Entregado y Leído).</li>
+                            <li>• <b>V-Moments (Historias):</b> Comparte fotos, pensamientos y videos de hasta 3 minutos por 24 horas.</li>
+                            <li>• <b>Música de Perfil e Historias:</b> Vincula archivos de audio de tu dispositivo para compartir lo que escuchas.</li>
+                            <li>• <b>Reacciones y Menciones:</b> Comenta historias y responde rápido mencionando usuarios con <b>@usuario</b>.</li>
+                            <li>• <b>Notificaciones por Telegram:</b> Avisos inmediatos y gestión de solicitudes de amistad desde Telegram.</li>
+                            <li>• <b>Seguridad Avanzada:</b> Bloqueo de sesión múltiple y recuperación por Pregunta Secreta u OTP.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #ffd700; font-size: 13.5px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 4px;">
+                            <i class="fas fa-crown"></i> 👑 FUNCIONES EXCLUSIVAS (PREMIUM VIP)
+                        </h4>
+                        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px;">
+                            <li>• <b>Ocultar Chats en V-Privados:</b> Doble toque en un contacto para ocultarlo. Escribe tu PIN de 4 dígitos en el buscador para abrir tu bóveda secreta y gestionarlos.</li>
+                            <li>• <b>Sin Publicidad:</b> Navegación y chats 100% libres de banners publicitarios.</li>
+                            <li>• <b>Videos Extendidos en Historias:</b> Publica videos de larga duración de hasta 10 minutos en V-Moments.</li>
+                            <li>• <b>Insignia VIP:</b> Corona dorada de usuario VIP visible en tu nombre de perfil y chats.</li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
-            <div class="modal-footer" style="margin-top: 25px;">
-                <button id="close-changelog-modal" class="btn-primary" style="width: 100%;">¡Entendido, gracias!</button>
+            <div class="modal-footer" style="margin-top: 20px;">
+                <button id="close-changelog-modal" class="btn-primary" style="width: 100%;">¡Entendido!</button>
             </div>
         </div>
     </div>
@@ -204,7 +197,6 @@
     <div id="app-container" class="app-wrapper hidden">
         <div class="main-window" id="mainWindow">
             
-            <!-- SIDEBAR - CONTACTOS -->
             <aside class="sidebar" id="app-sidebar">
                 <header class="side-header">
                     <img src="" id="my-avatar" class="avatar-sm clickable" title="Cambiar foto de perfil" alt="Avatar">
@@ -228,7 +220,6 @@
                     </div>
                 </header>
 
-                <!-- PANEL DE SOLICITUDES -->
                 <div id="requests-panel" class="settings-panel hidden-panel">
                     <header class="settings-header">
                         <button id="back-requests">
@@ -240,7 +231,6 @@
                     </div>
                 </div>
 
-                <!-- PANEL DE AJUSTES / PERFIL -->
                 <div id="settings-panel" class="settings-panel hidden-panel">
                     <header class="settings-header">
                         <button id="back-settings">
@@ -264,11 +254,9 @@
                             </div>
                         </div>
 
-                        <!-- SECCIÓN INDICADOR DE PLAN VIP / ADQUISICIÓN -->
                         <div class="id-badge-container" style="background: rgba(255, 215, 0, 0.05); border-color: rgba(255, 215, 0, 0.2); display: flex; flex-direction: column; gap: 8px;">
                             <span>Plan Actual</span>
                             <strong id="settings-plan-label" style="font-size: 18px; color: var(--text-main);">Cargando...</strong>
-                            <!-- Botón de adquisición para disparar el modal de pago -->
                             <button id="upgrade-premium-btn" class="btn-primary hidden" style="background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; border: none; cursor: pointer; padding: 10px 18px; border-radius: 8px; font-size: 12.5px; font-weight: bold; text-align: center; width: 100%; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);"><i class="fas fa-crown"></i> Adquirir V-Chat Premium</button>
                         </div>
                         
@@ -282,7 +270,6 @@
                             <input type="text" id="edit-custom-status" placeholder="Escribe algo sobre ti...">
                         </div>
 
-                        <!-- SECCIÓN COMPARTIR MÚSICA CON SELECTOR MULTIMEDIA LOCAL -->
                         <div class="setting-item" style="border-top: 1px solid var(--border-light); padding-top: 15px;">
                             <label style="color: var(--vchat-green);"><i class="fas fa-music"></i> ¿Qué estás escuchando ahora?</label>
                             <div style="display: flex; gap: 8px; margin-top: 8px;">
@@ -294,27 +281,25 @@
                             <input type="file" id="profile-music-file" accept="audio/*" style="display: none;">
                         </div>
 
-                        <!-- INTEGRACIÓN DE NOTIFICACIONES DE TELEGRAM CON TEST DE CONEXIÓN -->
                         <div class="setting-item" style="border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px;">
                             <label style="color: var(--vchat-green); font-weight: bold;"><i class="fab fa-telegram"></i> Notificaciones de Telegram</label>
                             <p style="font-size: 11.5px; color: var(--text-sec); margin-bottom: 8px; line-height: 1.4;">
-                                Recibe alertas inmediatas en Telegram de mensajes, reacciones y comentarios:
-                                <br>1. Escribe e inicia al bot: <a href="https://t.me/vchat_notifications_bot" target="_blank" style="color: var(--vchat-green); text-decoration: underline;">@vchat_notifications_bot</a>
-                                <br>2. Consigue tu Chat ID usando el bot: <a href="https://t.me/userinfobot" target="_blank" style="color: var(--vchat-green); text-decoration: underline;">@userinfobot</a>
-                                <br>3. Pega tu ID numérico y pulsa "Probar" para verificar la conexión:
+                                Recibe alertas inmediatas en Telegram de mensajes y comentarios:
+                                <br>1. Inicia al bot: <a href="https://t.me/vchat_notifications_bot" target="_blank" style="color: var(--vchat-green); text-decoration: underline;">@vchat_notifications_bot</a>
+                                <br>2. Consigue tu Chat ID usando: <a href="https://t.me/userinfobot" target="_blank" style="color: var(--vchat-green); text-decoration: underline;">@userinfobot</a>
+                                <br>3. Pega tu ID numérico y pulsa "Probar":
                             </p>
                             <div style="display: flex; gap: 8px; margin-top: 8px; width: 100%;">
                                 <input type="text" id="edit-telegram-id" placeholder="Ej: 123456789" style="flex: 1; min-width: 0;">
-                                <button type="button" id="test-telegram-btn" class="btn-primary" style="padding: 10px 14px; font-size: 12px; font-weight: bold; background: #0088cc; box-shadow: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;" title="Probar conexión con el bot de Telegram"><i class="fas fa-paper-plane"></i> Probar</button>
+                                <button type="button" id="test-telegram-btn" class="btn-primary" style="padding: 10px 14px; font-size: 12px; font-weight: bold; background: #0088cc; box-shadow: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;" title="Probar conexión"><i class="fas fa-paper-plane"></i> Probar</button>
                             </div>
                             <p id="telegram-test-status" style="font-size: 11.5px; margin-top: 8px; display: none; line-height: 1.4; font-weight: 500;"></p>
                         </div>
 
-                        <!-- NUEVA SECCIÓN DE GESTIÓN Y ELIMINACIÓN DE CONTACTOS AGREGADOS -->
                         <div class="setting-item" style="border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px;">
                             <label style="color: #ff3b30; font-weight: bold;"><i class="fas fa-user-minus"></i> Eliminar Contactos</label>
                             <p style="font-size: 11.5px; color: var(--text-sec); margin-bottom: 10px;">
-                                Elimina usuarios de tu lista si ya no deseas que tengan acceso a tu chat privado:
+                                Elimina usuarios si deseas desvincular la relación de amistad:
                             </p>
                             <div id="settings-contacts-manager" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; background: var(--chat-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border-light);">
                                 <p style="font-size:11.5px; color:var(--text-sec); text-align:center; padding:10px 0;">Cargando tus contactos...</p>
@@ -324,7 +309,6 @@
                     </div>
                 </div>
 
-                <!-- PANEL DE CHATS PRIVADOS (V-PRIVADOS SÓLO PREMIUM) -->
                 <div id="private-panel" class="settings-panel hidden-panel">
                     <header class="settings-header" style="background: linear-gradient(135deg, #1f2c34, #0b141a); border-bottom: 2px solid var(--vchat-green);">
                         <button id="back-private">
@@ -333,13 +317,12 @@
                     </header>
                     <div class="settings-body">
                         <p style="font-size: 11.5px; color: var(--text-sec); margin-bottom: 15px; line-height: 1.4;">
-                            <i class="fas fa-user-shield" style="color: var(--vchat-green);"></i> Lista de contactos ocultos de tu cuenta VIP. Doble clic en un contacto aquí para deolverlo a la lista pública.
+                            <i class="fas fa-user-shield" style="color: var(--vchat-green);"></i> Lista de contactos ocultos de tu cuenta VIP. Pulsa "Desocultar" para devolver un contacto a la lista pública.
                         </p>
                         <div id="private-contacts-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
                     </div>
                 </div>
 
-                <!-- BARRA DE BÚSQUEDA -->
                 <div class="search-bar" style="padding: 12px 16px;">
                     <div style="background: var(--input-bg); border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px;">
                         <i class="fas fa-search" style="color: var(--text-sec);"></i>
@@ -350,13 +333,10 @@
                 <div class="contact-list" id="contactList"></div>
             </aside>
 
-            <!-- MAIN CONTENT AREA -->
             <main class="chat-main" id="app-chat-main">
                 
-                <!-- FEED SOCIAL DE HISTORIAS (V-MOMENTS) -->
                 <div id="feed-view" class="feed-container">
                     
-                    <!-- CABECERA DEL FEED EN MÓVILES -->
                     <header class="feed-mobile-header">
                         <button id="mobile-feed-back-btn" class="feed-back-btn">
                             <i class="fas fa-comments"></i> Chats
@@ -367,18 +347,16 @@
 
                     <div class="feed-content-wrapper">
                         
-                        <!-- TARJETA INFORMATIVA DE NOVEDADES (Megáfono) -->
                         <div id="changelog-status-trigger" class="status-my-item clickable" style="border: 1px solid var(--vchat-green); background: rgba(0, 191, 165, 0.05); margin-bottom: 20px; display: flex; align-items: center; gap: 15px; padding: 18px; border-radius: 16px;">
                             <span style="font-size: 22px; color: var(--vchat-green); padding: 0 4px; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-bullhorn"></i>
                             </span>
                             <div>
-                                <h4 style="font-size: 14px; color: var(--text-main); font-weight: bold; margin: 0;">Novedades de V-Chat</h4>
-                                <span style="font-size: 11px; color: var(--vchat-green); font-weight: 500;">Ver notas de la actualización activa</span>
+                                <h4 style="font-size: 14px; color: var(--text-main); font-weight: bold; margin: 0;">V-Novedades</h4>
+                                <span style="font-size: 11px; color: var(--vchat-green); font-weight: 500;">Ver funciones Free y Premium VIP</span>
                             </div>
                         </div>
 
-                        <!-- CONTENEDOR PUBLICITARIO DE ADSTERRA AISLADO CON IFRAME DE REDIRECCIONAMIENTO PROTEGIDO -->
                         <div id="adsterra-banner-container" style="width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:20px; background:var(--sidebar-bg); padding:10px; border-radius:16px; border:1px solid var(--border-light); overflow:hidden; min-height: 70px;">
                             <iframe id="adsterra-secure-frame" style="width:320px; height:50px; border:none; overflow:hidden;" scrolling="no" srcdoc='
                                 <html style="margin:0; padding:0; overflow:hidden;">
@@ -398,7 +376,6 @@
                             '></iframe>
                         </div>
 
-                        <!-- BANNER CREAR HISTORIA -->
                         <div class="status-my-item clickable" id="create-status-btn" style="margin-bottom: 20px;">
                             <img src="" id="my-status-avatar" class="avatar-sm" style="border: 2px dashed var(--vchat-green);">
                             <div>
@@ -415,7 +392,6 @@
                     </div>
                 </div>
 
-                <!-- ELEMENTOS DEL CHAT ACTIVO -->
                 <header class="chat-navbar hidden" id="chat-navbar">
                     <div class="chat-target-info">
                         <button id="mobile-back-btn" style="background: none; border: none; font-size: 20px; color: var(--text-main); cursor: pointer; display: none; margin-right: 15px;">
@@ -433,7 +409,6 @@
 
                 <div class="chat-body hidden" id="messagesContainer"></div>
 
-                <!-- PREVIEW DE RESPUESTA -->
                 <div id="reply-gui" class="reply-preview-container hidden">
                     <div style="flex: 1; border-left: 4px solid var(--vchat-green); padding-left: 12px;">
                         <small id="reply-user-label" style="color: var(--vchat-green); font-weight: bold;">
@@ -488,7 +463,6 @@
             <div class="emoji-bar" id="emoji-bar-status" style="margin-bottom: 15px; justify-content: center;"></div>
             <textarea id="status-text" placeholder="¿Qué tienes en mente para compartir hoy?" style="width: 100%; height: 90px; padding: 12px; background: var(--chat-bg); border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-main); resize: none;"></textarea>
             
-            <!-- CONTROLES PARA COMPARTIR MÚSICA LOCAL EN LA HISTORIA -->
             <div style="margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
                 <label style="font-size: 13px; font-weight: bold; color: var(--vchat-green); display: block; margin-bottom: 8px;">
                     <i class="fas fa-music"></i> ¿Qué estás escuchando en tu celular?
@@ -516,23 +490,20 @@
         </div>
     </div>
 
-    <!-- MODAL ADQUIRIR PREMIUM MULTI-OPCIÓN (SUSCRIPCIÓN SEMESTRAL) -->
+    <!-- MODAL PREMIUM -->
     <div id="premium-modal" class="modal-overlay hidden" style="z-index: 10007;">
         <div class="modal-card" style="width: 440px; border-top: 5px solid #ffd700; max-height:85vh; overflow-y:auto;">
             <h3 style="color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.4); margin-bottom: 15px;"><i class="fas fa-crown"></i> Adquirir V-Chat Premium</h3>
-            <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 20px; line-height: 1.5;">Selecciona tu método de pago preferido para activar tu cuenta VIP por un periodo de **6 meses renovables** y desbloquear todos los beneficios:</p>
+            <p style="font-size: 13px; color: var(--text-sec); margin-bottom: 20px; line-height: 1.5;">Selecciona tu método de pago preferido para activar tu cuenta VIP por 6 meses y desbloquear todos los beneficios:</p>
             
-            <!-- Opción de Pago Internacional (PayPal con concepto Semestral) -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); padding: 15px; border-radius: 14px; margin-bottom: 15px;">
                 <h4 style="font-size: 14px; color: #0070ba; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                     <i class="fab fa-paypal"></i> Pago Internacional (PayPal)
                 </h4>
                 <p style="font-size: 12px; color: var(--text-sec); margin-bottom: 12px;">Adquiere tu plan VIP de forma inmediata en dólares americanos por un periodo de 6 meses utilizando tu saldo o tarjeta en PayPal.</p>
-                <!-- Modificado: Concepto de producto especificado como VIP Semestral en PayPal -->
                 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=cgalindez.galindez@gmail.com&item_name=V-Chat%20Premium%20VIP%20Semestral%20(6%20Meses)&amount=2.99&currency_code=USD" target="_blank" class="btn-primary" style="background: #0070ba; color: white; text-decoration: none; display: inline-block; width: 100%; text-align: center; font-size: 13px; padding: 11px; border-radius: 10px; font-weight: bold; border:none; box-shadow:none;">Pagar con PayPal</a>
             </div>
 
-            <!-- Opción de Pago Venezuela (Pago Móvil Semestral) -->
             <div style="background: rgba(0, 191, 165, 0.05); border: 1px solid rgba(0, 191, 165, 0.2); padding: 15px; border-radius: 14px;">
                 <h4 style="font-size: 14px; color: var(--vchat-green); display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                     <i class="fas fa-mobile-alt"></i> Pago en Venezuela (Pago Móvil)
@@ -542,17 +513,13 @@
                     <div>• <b>Banco:</b> Banco de Venezuela (0102)</div>
                     <div>• <b>Teléfono:</b> 0412-1235648</div>
                     <div>• <b>Cédula de Identidad:</b> V-20.447.18</div>
-                    <div>• <b>Monto de referencia:</b> Equivalente a $2.99 USD (Válido por 6 meses)</div>
+                    <div>• <b>Monto de referencia:</b> Equivalente a $2.99 USD</div>
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
                     <a id="support-whatsapp-btn" href="#" target="_blank" class="btn-primary" style="background: #25d366; color: white; text-decoration: none; padding: 10px 14px; border-radius: 10px; font-size: 11.5px; font-weight: bold; flex: 1; text-align: center; border:none; box-shadow:none;"><i class="fab fa-whatsapp"></i> Reportar por WhatsApp</a>
                     <button onclick="window.contactAdminSupport(); document.getElementById('premium-modal').classList.add('hidden');" class="btn-secondary" style="background: var(--input-bg); color: var(--vchat-green); padding: 10px 14px; border-radius: 10px; font-size: 11.5px; font-weight: bold; flex: 1; border: 1px solid rgba(0, 191, 165, 0.2); cursor: pointer;"><i class="fas fa-comment-dots"></i> Reportar en V-Chat</button>
                 </div>
-
-                <p style="font-size: 11px; color: var(--vchat-green); font-style: italic; line-height: 1.3; margin-top:12px;">
-                    * Una vez enviado el reporte por cualquiera de las dos vías, el administrador verificará tu pago y activará tu plan VIP semestral de inmediato.
-                </p>
             </div>
 
             <div class="modal-footer" style="margin-top: 20px;">
@@ -561,7 +528,7 @@
         </div>
     </div>
 
-    <!-- CONTENEDOR DE NOTIFICACIONES TOAST (NUEVO Y NECESARIO) -->
+    <!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
     <div id="toast-notification" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ff3b30; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; font-size: 14px; z-index: 10008; box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: fadeInUp 0.3s ease;">
         <span id="toast-message"></span>
     </div>
