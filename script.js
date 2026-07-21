@@ -63,12 +63,12 @@ window.addEventListener('beforeunload', () => {
 
 const EMOJI_DATA = {
     "Sonrisas y personas": ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🫢','🫣','🤫','🤔','🫡','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😌','😔','😪','🤤','😴','😷','👍','👎','👏','🙌','🫶','🙏','💪'],
-    "Animales y naturaleza": ['🐵','🐶','🐺','🦊','🦝','🐱','🦁','🐯','🐴','🦄','🦓','🐷','🐹','🐰','🐻','🐼','🐨','🐸','🐙','🐒','🐟','🐠','🐡','🦈','🦋','💮','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🍀'],
-    "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','阱','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
+    "Animales y naturaleza": ['🐵','🐶','🐺','🦊','🦝','🐱','🦁','🐯','🐴','🦄','ZEBRA','🐷','🐹','🐰','🐻','🐼','🐨','🐸','🐙','🐒','🐟','🐠','🐡','🦈','🦋','💮','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🍀'],
+    "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
     "Actividades": ['🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎁','🏆','🏅','🥇','⚽','⚾','🥎','🏀','🏈','🎾','🎱','🎯','🎮','🕹️','🎰','🎲','🧩','🧸','♠️','♥️','♦️','♣️','♟️','🎨','🎭','🎬'],
-    "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','\uD83D\uDE4F','🛐','\uD83D\uDE4F','🛐','⛵','🛶','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
-    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','RING','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','RADIO','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
-    "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','\uD83D\uDE4F','🛐','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️','🛗','🪞','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦']
+    "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','🛶','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
+    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞','🪟','🛋️','🪑','🚽','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
+    "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️']
 };
 
 // =======================================================
@@ -102,7 +102,6 @@ async function notifyUserViaTelegram(userId, text) {
             
         if (error || !user) return;
         
-        // PARÁMETRO DE PRESENCIA RESTABLECIDO:
         if (user.status === 'online') {
             return;
         }
@@ -314,7 +313,7 @@ window.openEmojiPicker = (targetId, isReaction = false) => {
 };
 
 // =======================================================
-// 4. AUTENTICACIÓN Y RECUPERACIÓN (CORREGIDO GLOBALMENTE)
+// 4. AUTENTICACIÓN Y RECUPERACIÓN
 // =======================================================
 const authForm = document.getElementById('auth-form');
 const toggleLink = document.getElementById('toggle-link');
@@ -322,17 +321,13 @@ const toggleLink = document.getElementById('toggle-link');
 toggleLink.onclick = () => {
     isRegistering = !isRegistering;
     document.getElementById('auth-title').innerText = isRegistering ? "Crear Cuenta" : "V-Chat";
-    
-    // CORREGIDO: Alternancia dinámica de placeholder (Solo usuario para Registro / ID o usuario para Login)
     document.getElementById('login-identifier').placeholder = isRegistering ? "Nombre de Usuario" : "Usuario o ID V-Chat";
-    
     document.getElementById('reg-name-group').style.display = isRegistering ? "flex" : "none";
     document.getElementById('register-recovery-fields').style.display = isRegistering ? "flex" : "none";
     document.getElementById('auth-btn').innerText = isRegistering ? "Registrarse" : "Iniciar Sesión";
     toggleLink.innerText = isRegistering ? "¿Ya tienes cuenta? Inicia Sesión" : "Crear una cuenta nueva";
 };
 
-// Sincronización en tiempo real para verificar la disponibilidad del nombre de usuario al escribir en registro
 const loginIdInput = document.getElementById('login-identifier');
 const userStatusLabel = document.getElementById('username-availability-status');
 
@@ -373,7 +368,6 @@ if (loginIdInput) {
     };
 }
 
-// CORREGIDO: Detector táctil de doble toque adaptado a teléfonos móviles para la barra de búsqueda
 const searchInput = document.getElementById('search-contacts');
 let lastSearchTap = 0;
 if (searchInput) {
@@ -382,7 +376,6 @@ if (searchInput) {
         const timespan = now - lastSearchTap;
         
         if (timespan < 350 && timespan > 0) {
-            // Doble toque táctil detectado con éxito
             if (!currentUser) return;
             if (!currentUser.is_premium) {
                 showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
@@ -475,7 +468,7 @@ authForm.onsubmit = async (e) => {
             if (!isRegistering) {
                 failedLoginAttempts++;
                 if (failedLoginAttempts >= 3) {
-                    failedLoginAttempts = 0; // reset
+                    failedLoginAttempts = 0;
                     showToast("Intentos fallidos excedidos. Redirigiendo a recuperación...", true);
                     setTimeout(() => {
                         document.getElementById('recovery-identifier').value = iden;
@@ -490,7 +483,6 @@ authForm.onsubmit = async (e) => {
     }
 };
 
-// CORREGIDO: Eventos de recuperación y volver activos inmediatamente en el ámbito GLOBAL (Pre-login)
 document.getElementById('forgot-password-link').onclick = () => {
     document.getElementById('recovery-modal').classList.remove('hidden');
 };
@@ -602,13 +594,12 @@ messageForm.onsubmit = async (e) => {
     const text = messageInput.value.trim();
     if (!text || !activeChatId) return;
 
-    // CIFRADO NATIVO E2EE: Cifrar localmente el texto antes de insertarlo en Supabase
     const encryptedText = encryptMessage(text, currentUser.id, activeChatId);
 
     const { error } = await _supabase.from('messages').insert([{
         sender_id: currentUser.id,
         receiver_id: activeChatId,
-        text: encryptedText, // Guardar el criptograma cifrado
+        text: encryptedText,
         media_type: 'text'
     }]);
 
@@ -671,7 +662,6 @@ async function loadMessages() {
 
                 let bodyHtml = ``;
                 if (m.media_type === 'text') {
-                    // DESCIFRADO LOCAL: Descifrar el mensaje con la clave privada de la conversación
                     const decryptedText = decryptMessage(m.text, m.sender_id, m.receiver_id);
                     bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${decryptedText}</span>`;
                 } else if (m.media_type === 'image' && m.media_url) {
@@ -781,12 +771,11 @@ window.editMessagePrompt = async (id) => {
     const textSpan = msgDiv.querySelector('.msg-text');
     if (!textSpan) return;
 
-    const oldText = textSpan.innerText; // Plain text
+    const oldText = textSpan.innerText;
     const newText = prompt("Editar mensaje de texto:", oldText);
     if (newText === null || newText.trim() === "" || newText === oldText) return;
 
     try {
-        // Encriptar el nuevo texto modificado antes de guardarlo en Supabase
         const encryptedNewText = encryptMessage(newText.trim(), currentUser.id, activeChatId);
         const response = await _supabase
             .from('messages').update({ text: encryptedNewText }).eq('id', id);
@@ -1022,7 +1011,6 @@ document.getElementById('confirm-add-contact').onclick = async () => {
         document.getElementById('contact-modal').classList.add('hidden');
         document.getElementById('new-contact-id').value = "";
         
-        // Enlace rápido de Deep-Linking dinámico a Telegram (Aceptar/Rechazar)
         const appUrl = window.location.origin + window.location.pathname;
         const tgText = `👥 <b>Solicitud de Amistad</b>\n\n¡Has recibido una solicitud de amistad de <b>${currentUser.name}</b>!\n\n` +
                        `👉 <a href="${appUrl}?accept_req=${insData.id}">Aceptar Solicitud</a>\n` +
@@ -1092,6 +1080,7 @@ window.respondRequest = async (requestId, newStatus) => {
             showToast("Solicitud de amistad aceptada");
         }
         loadIncomingRequests();
+        window.lastContactsSignature = "";
         loadContacts();
     } catch (err) {
         showToast(err.message, true);
@@ -1101,6 +1090,7 @@ window.respondRequest = async (requestId, newStatus) => {
 _supabase.channel('realtime-contacts')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => {
         loadIncomingRequests();
+        window.lastContactsSignature = "";
         loadContacts();
     }).subscribe();
 
@@ -1528,7 +1518,6 @@ window.editComment = async (commentId, oldCommentText) => {
     } catch (err) { showToast(err.message, true); }
 };
 
-// CORREGIDO: Solucionada la consulta de eliminación de comentarios (.eq('id', commentId))
 window.deleteComment = async (commentId) => {
     if (!confirm("¿Deseas eliminar este comentario?")) return;
     try {
@@ -1598,6 +1587,7 @@ window.deleteContact = async (contactId, name) => {
             
         if (response.error) throw response.error;
         showToast("Contacto eliminado");
+        window.lastContactsSignature = "";
         loadContacts();
     } catch (err) {
         console.error("Fallo al eliminar contacto:", err);
@@ -1677,6 +1667,7 @@ if (listenInput) {
             if (response.error) throw response.error;
             currentUser.listening_to = songName;
             showToast("Música actual actualizada");
+            window.lastContactsSignature = "";
             loadContacts();
         } catch (err) {
             console.error(err);
@@ -1701,6 +1692,7 @@ if (profileMusicInput) {
             await _supabase.from('users').update({ listening_to: cleanedSongName }).eq('id', currentUser.id);
             currentUser.listening_to = cleanedSongName;
             showToast("Música actualizada");
+            window.lastContactsSignature = "";
             loadContacts();
 
             if (confirm(`¿Deseas compartir "${cleanedSongName}" también en tus historias?`)) {
@@ -1733,6 +1725,7 @@ if (localMusicInput) {
                 if (document.getElementById('edit-listening-to')) {
                     document.getElementById('edit-listening-to').value = cleanedSongName;
                 }
+                window.lastContactsSignature = "";
                 loadContacts();
             } catch (err) {
                 console.warn("Fallo al sincronizar música local:", err);
@@ -1759,7 +1752,6 @@ if (tgInput) {
     };
 }
 
-// INTEGRACIÓN: TEST DE CONEXIÓN CON TELEGRAM EN TIEMPO REAL
 const testTgBtn = document.getElementById('test-telegram-btn');
 if (testTgBtn) {
     testTgBtn.onclick = async () => {
@@ -1811,7 +1803,6 @@ window.toggleContactPrivacy = (contactId, name) => {
         return;
     }
     
-    // CORREGIDO: Si es primera vez, obligar a crear el PIN antes de permitir ocultar el contacto
     const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
     if (!savedPin) {
         const newPin = prompt("Para usar esta función, primero debes configurar tu PIN de seguridad de 4 dígitos:");
@@ -1838,11 +1829,14 @@ window.toggleContactPrivacy = (contactId, name) => {
     }
     
     localStorage.setItem(`vchat_private_list_${currentUser.id}`, JSON.stringify(privateList));
+    
+    // FORZAR RE-RENDERIZADO INMEDIATO EN LA LISTA PÚBLICA Y PRIVADA
+    window.lastContactsSignature = "";
     loadContacts();
     loadPrivateContactsList();
 };
 
-// Generar lista de contactos privados ocultos en el panel secreto de seguridad con soporte multitáctil rápido
+// Generar lista de contactos privados ocultos en el panel secreto de seguridad
 function loadPrivateContactsList() {
     const listContainer = document.getElementById('private-contacts-list');
     if (!listContainer || !currentUser) return;
@@ -1855,7 +1849,6 @@ function loadPrivateContactsList() {
         return;
     }
     
-    // Buscar los contactos reales correspondientes a los IDs guardados de forma privada
     const privateContacts = globalContacts.map(c => {
         const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
         if (contact && privateList.includes(contact.id)) return contact;
@@ -1864,38 +1857,20 @@ function loadPrivateContactsList() {
     
     listContainer.innerHTML = privateContacts.map(contact => {
         return `
-            <div id="private-item-${contact.id}" class="contact-item" style="display:flex; align-items:center; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.1);" >
-                <img src="${contact.avatar_url}" class="avatar-sm">
-                <div>
-                    <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
-                    <p style="font-size:11px; color:var(--vchat-green); margin-top:2px;">Doble clic para desocultar</p>
+            <div id="private-item-${contact.id}" class="contact-item" style="display:flex; align-items:center; justify-content:space-between; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.2);" >
+                <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;" onclick="window.startChat('${contact.id}', '${contact.name.replace(/'/g, "\\'")}', '${contact.avatar_url}'); document.getElementById('back-private').click();">
+                    <img src="${contact.avatar_url}" class="avatar-sm">
+                    <div>
+                        <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
+                        <p style="font-size:11px; color:var(--vchat-green); margin-top:2px;">Toca para abrir chat</p>
+                    </div>
                 </div>
+                <button onclick="window.toggleContactPrivacy('${contact.id}', '${contact.name.replace(/'/g, "\\'")}')" style="background: rgba(0, 191, 165, 0.15); border: 1px solid var(--vchat-green); color: var(--vchat-green); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;" title="Devolver a lista pública">
+                    <i class="fas fa-eye"></i> Desocultar
+                </button>
             </div>
         `;
     }).join('');
-
-    // CORREGIDO: Vincular el detector rápido de toque y doble toque en móviles para la lista de privados
-    privateContacts.forEach(contact => {
-        const itemDiv = document.getElementById(`private-item-${contact.id}`);
-        if (itemDiv) {
-            let lastPrivateTap = 0;
-            itemDiv.onclick = (e) => {
-                const now = Date.now();
-                const timespan = now - lastPrivateTap;
-                if (timespan < 300 && timespan > 0) {
-                    window.toggleContactPrivacy(contact.id, contact.name);
-                } else {
-                    setTimeout(() => {
-                        if (Date.now() - lastPrivateTap >= 300) {
-                            window.startChat(contact.id, contact.name, contact.avatar_url);
-                            document.getElementById('back-private').click();
-                        }
-                    }, 250);
-                }
-                lastPrivateTap = now;
-            };
-        }
-    });
 }
 
 function updatePremiumUI() {
@@ -1965,7 +1940,6 @@ window.showChatView = () => {
     document.getElementById('mainWindow').className = 'main-window view-chat';
 };
 
-// Procesa acciones rápidas de Telegram (Deep Linking) al cargar
 async function handleUrlActions() {
     const urlParams = new URLSearchParams(window.location.search);
     const acceptId = urlParams.get('accept_req');
@@ -1975,6 +1949,7 @@ async function handleUrlActions() {
         if (!error) {
             showToast("Solicitud de amistad aceptada");
             window.history.replaceState({}, document.title, window.location.pathname);
+            window.lastContactsSignature = "";
             loadContacts();
         }
     } else if (rejectId) {
@@ -1982,6 +1957,7 @@ async function handleUrlActions() {
         if (!error) {
             showToast("Solicitud de amistad rechazada");
             window.history.replaceState({}, document.title, window.location.pathname);
+            window.lastContactsSignature = "";
             loadContacts();
         }
     }
@@ -1999,7 +1975,6 @@ async function showApp(user) {
             return;
         }
         
-        // INTEGRA: Control estricto de multicuenta (Sesión Única)
         if (profile.status === 'online') {
             showToast("Cerrando sesión activa en otros dispositivos...", true);
         }
@@ -2038,6 +2013,7 @@ async function showApp(user) {
 
         initNavigation();
         initEmojiBars();
+        window.lastContactsSignature = "";
         loadContacts();
         loadIncomingRequests();
         loadStatuses();
@@ -2045,7 +2021,6 @@ async function showApp(user) {
         
         loadSafeAd();
         
-        // Ejecutar procesamiento de Deep Linking de Telegram
         await handleUrlActions();
         
         window.showFeedView();
@@ -2077,6 +2052,7 @@ async function showApp(user) {
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${currentUser.id}` }, (payload) => {
                 currentUser = payload.new;
                 updatePremiumUI();
+                window.lastContactsSignature = "";
                 loadContacts();
                 loadStatuses();
             })
@@ -2158,7 +2134,9 @@ async function loadContacts() {
         const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
         const privateList = JSON.parse(privateListStr);
         
+        // Se añade privateList a la firma para que la pantalla se vuelva a dibujar inmediatamente al ocultar/desocultar
         const signature = JSON.stringify([
+            privateList,
             ...contactsData.map(c => {
                 const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
                 if (!contact) return null;
@@ -2189,7 +2167,7 @@ async function loadContacts() {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact) return;
             
-            // INTEGRA: Si el contacto está en la lista privada, se omite por completo de la barra lateral pública
+            // Omite el contacto si está marcado en tu lista de privados
             if (privateList.includes(contact.id)) {
                 return;
             }
@@ -2223,7 +2201,7 @@ async function loadContacts() {
             
             const item = document.createElement('div');
             item.className = 'contact-item';
-            item.id = `contact-item-id-${contact.id}`; // Añadido ID para asociar eventos táctiles
+            item.id = `contact-item-id-${contact.id}`;
             item.style.display = 'flex';
             item.style.alignItems = 'center';
             item.style.gap = '15px';
@@ -2237,7 +2215,7 @@ async function loadContacts() {
             container.appendChild(item);
         });
 
-        // CORREGIDO: Vincular el detector rápido de toque y doble toque en móviles para la lista pública
+        // Evento de doble toque o clic rápido
         contactsData.forEach(c => {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact || privateList.includes(contact.id)) return;
@@ -2339,6 +2317,7 @@ async function loadContacts() {
 
 _supabase.channel('realtime-users-presence')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
+        window.lastContactsSignature = "";
         loadContacts();
     }).subscribe();
 
@@ -2463,7 +2442,7 @@ setInterval(() => {
 }, 5000);
 
 // =======================================================
-// 12. CONTROL SEGURO DE PUBLICIDAD (PREVENT LOOP & HIJACK)
+// 12. CONTROL SEGURO DE PUBLICIDAD
 // =======================================================
 function loadSafeAd() {
     const container = document.getElementById('adsterra-banner-container');
