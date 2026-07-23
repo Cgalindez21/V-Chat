@@ -231,6 +231,7 @@ function initNavigation() {
         location.reload();
     };
 
+    // APERTURA DEL MODAL DE INFORMACIÓN Y PRIVACIDAD AL TOCAR LA CABECERA DEL CHAT
     const chatHeaderTrigger = document.getElementById('chat-target-info-trigger');
     if (chatHeaderTrigger) {
         chatHeaderTrigger.onclick = () => {
@@ -246,6 +247,7 @@ function initNavigation() {
         };
     }
 
+    // MANEJADOR DEL INTERRUPTOR SWITCH DE PRIVACIDAD
     const privateSwitch = document.getElementById('toggle-private-switch');
     if (privateSwitch) {
         privateSwitch.onchange = (e) => {
@@ -263,6 +265,7 @@ function initNavigation() {
     }
 }
 
+// ABRIR Y POBLAR MODAL DE DETALLES DEL CONTACTO
 window.openContactInfoModal = (contact) => {
     const modal = document.getElementById('contact-info-modal');
     if (!modal) return;
@@ -280,6 +283,7 @@ window.openContactInfoModal = (contact) => {
     nameLabel.innerText = contact.name;
     usernameLabel.innerText = `@${contact.username || 'usuario'} • ${contact.vchat_id || ''}`;
 
+    // Verificar si el contacto ya está marcado como privado
     const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
     const privateList = JSON.parse(privateListStr);
     const isPrivate = privateList.includes(contact.id);
@@ -1897,7 +1901,7 @@ window.deleteContact = async (contactId, name) => {
 };
 
 // =======================================================
-// 8. ENLACES DEL PERFIL Y PRIVACIDAD VIP
+// 8. ENLACES DEL PERFIL
 // =======================================================
 document.getElementById('edit-avatar-file').onchange = async (e) => {
     const file = e.target.files[0];
@@ -2135,6 +2139,7 @@ window.toggleContactPrivacy = (contactId, name) => {
     loadPrivateContactsList();
 };
 
+// Generar lista de contactos privados ocultos en el panel secreto de seguridad
 function loadPrivateContactsList() {
     const listContainer = document.getElementById('private-contacts-list');
     if (!listContainer || !currentUser) return;
@@ -2160,7 +2165,7 @@ function loadPrivateContactsList() {
 
         return `
             <div id="private-item-${contact.id}" class="contact-item" style="display:flex; align-items:center; justify-content:space-between; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.2);" >
-                <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;" onclick="window.startChat('${contact.id}', '${contact.name.replace(/'/g, "\\'")}', '${avatarSrc}', ${JSON.stringify(contact).replace(/"/g, '&quot;')}); document.getElementById('back-private').click();">
+                <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;" onclick="window.startChat('${contact.id}', '${contact.name.replace(/'/g, "\\'")}', '${avatarSrc}'); document.getElementById('back-private').click();">
                     <img src="${avatarSrc}" class="avatar-sm">
                     <div>
                         <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
@@ -2182,13 +2187,13 @@ function updatePremiumUI() {
     const upgradeBtn = document.getElementById('upgrade-premium-btn');
     
     if (currentUser.is_premium) {
-        if (adContainer) adContainer.style.display = 'none';
+        if (adContainer) adContainer.classList.add('hidden');
         if (planLabel) planLabel.innerHTML = `<span class="vip-crown"><i class="fas fa-crown"></i> V-Chat Premium</span>`;
-        if (upgradeBtn) upgradeBtn.style.display = 'none';
+        if (upgradeBtn) upgradeBtn.classList.add('hidden');
     } else {
-        if (adContainer) adContainer.style.display = 'flex';
+        if (adContainer) adContainer.classList.remove('hidden');
         if (planLabel) planLabel.innerHTML = `Plan Gratis`;
-        if (upgradeBtn) upgradeBtn.style.display = 'block';
+        if (upgradeBtn) upgradeBtn.classList.remove('hidden');
     }
 }
 
@@ -2524,7 +2529,7 @@ async function loadContacts() {
             item.style.transition = 'all 0.2s';
             item.innerHTML = itemHtml;
 
-            // ABRE EL CHAT INMEDIATAMENTE CON UN CLIC O TOQUE
+            // ABRE EL CHAT INMEDIATAMENTE CON UN CLIC
             item.onclick = (e) => {
                 e.stopPropagation();
                 window.startChat(contact.id, contact.name, avatarSrc, contact);
