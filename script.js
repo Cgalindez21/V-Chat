@@ -34,6 +34,17 @@ let searchDebounceTimer = null;
 
 let activeTargetUserObj = null;
 
+// Función auxiliar para escapar caracteres HTML y prevenir ataques XSS
+function escapeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 window.addEventListener('touchstart', () => { lastInteractionTime = Date.now(); }, { passive: true });
 window.addEventListener('click', () => { lastInteractionTime = Date.now(); }, { passive: true });
 window.addEventListener('keydown', () => { lastInteractionTime = Date.now(); }, { passive: true });
@@ -121,7 +132,7 @@ async function notifyUserViaTelegram(userId, text) {
 }
 
 // =======================================================
-// CRIPTOGRAFÍA: CIFRADO SIMÉTRICO DE EXTREMO A EXTREMO (E2EE) AES-256
+// CRIPTOGRAFÍA: CIFRADO SIMÉTRICO AES-256
 // =======================================================
 function getChatSymmetricKey(id1, id2) {
     const sortedIds = [id1, id2].sort().join('_');
@@ -397,7 +408,7 @@ window.openEmojiPicker = (targetId, isReaction = false) => {
 };
 
 // =======================================================
-// 4. AUTENTICACIÓN Y SEGURIDAD
+// 4. AUTENTICACIÓN Y SEGURIDAD (CORREGIDO EVITANDO STALE LOCKOUT)
 // =======================================================
 const authForm = document.getElementById('auth-form');
 const toggleLink = document.getElementById('toggle-link');
@@ -472,18 +483,21 @@ if (searchInput) {
     const checkPinAndOpenPrivate = () => {
         if (!currentUser) return false;
         const val = searchInput.value.trim();
-        const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
+        const savedPinHash = localStorage.getItem(`vchat_private_pin_hash_${currentUser.id}`);
         
-        if (savedPin && val === savedPin) {
-            if (!currentUser.is_premium) {
-                showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
-                return false;
+        if (savedPinHash && val.length === 4) {
+            const enteredHash = CryptoJS.SHA256(val).toString();
+            if (enteredHash === savedPinHash) {
+                if (!currentUser.is_premium) {
+                    showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
+                    return false;
+                }
+                searchInput.value = '';
+                filterContactsUI('');
+                loadPrivateContactsList();
+                togglePanel('private-panel', true);
+                return true;
             }
-            searchInput.value = '';
-            filterContactsUI('');
-            loadPrivateContactsList();
-            togglePanel('private-panel', true);
-            return true;
         }
         return false;
     };
@@ -502,9 +516,12 @@ if (searchInput) {
             const val = searchInput.value.trim();
             if (checkPinAndOpenPrivate()) return;
             
-            const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
-            if (savedPin && val.length === 4 && val !== savedPin) {
-                showToast("PIN de seguridad incorrecto.", true);
+            const savedPinHash = localStorage.getItem(`vchat_private_pin_hash_${currentUser.id}`);
+            if (savedPinHash && val.length === 4) {
+                const enteredHash = CryptoJS.SHA256(val).toString();
+                if (enteredHash !== savedPinHash) {
+                    showToast("PIN de seguridad incorrecto.", true);
+                }
             }
         }
     });
@@ -520,23 +537,27 @@ if (searchInput) {
                 return;
             }
             
-            const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
-            if (!savedPin) {
+            const savedPinHash = localStorage.getItem(`vchat_private_pin_hash_${currentUser.id}`);
+            if (!savedPinHash) {
                 const newPin = prompt("Configura tu PIN de seguridad privado de 4 dígitos:");
                 if (!newPin) return;
                 if (newPin.length !== 4 || isNaN(newPin)) {
                     showToast("El PIN debe ser exactamente de 4 dígitos numéricos.", true);
                     return;
                 }
-                localStorage.setItem(`vchat_private_pin_${currentUser.id}`, newPin);
+                const hashed = CryptoJS.SHA256(newPin).toString();
+                localStorage.setItem(`vchat_private_pin_hash_${currentUser.id}`, hashed);
                 showToast("¡PIN privado configurado con éxito!");
             } else {
                 const enteredPin = prompt("Ingresa tu PIN de acceso privado:");
-                if (enteredPin === savedPin) {
-                    loadPrivateContactsList();
-                    togglePanel('private-panel', true);
-                } else if (enteredPin !== null) {
-                    showToast("PIN de seguridad incorrecto.", true);
+                if (enteredPin !== null) {
+                    const enteredHash = CryptoJS.SHA256(enteredPin).toString();
+                    if (enteredHash === savedPinHash) {
+                        loadPrivateContactsList();
+                        togglePanel('private-panel', true);
+                    } else {
+                        showToast("PIN de seguridad incorrecto.", true);
+                    }
                 }
             }
         }
@@ -581,6 +602,7 @@ authForm.onsubmit = async (e) => {
                 }
             }
 
+            // 1. Obtener el perfil del usuario para validar su existencia
             const { data: userProfile, error: profileErr } = await _supabase
                 .from('users')
                 .select('*')
@@ -592,24 +614,25 @@ authForm.onsubmit = async (e) => {
                 return;
             }
 
-            if (userProfile.status === 'online') {
-                const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
-                if (!storedDeviceId) {
-                    showToast("Tienes una sesión activa en otro dispositivo. Te invitamos a cerrar la sesión en el equipo donde la tengas abierta para ingresar aquí.", true);
-                    
-                    if (userProfile.telegram_chat_id) {
-                        await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde otro equipo mientras mantienes tu sesión abierta.`);
-                    }
-                    return;
-                }
-            }
-
+            // 2. Intentar autenticar con Supabase Auth primero (valida la contraseña)
             const email = `${iden}@vchat.app`;
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
             if (response.error) throw response.error;
 
+            // 3. Una vez validada la contraseña, se verifica el control de dispositivos
+            const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
             const knownDeviceToken = localStorage.getItem(`vchat_known_device_token_${userProfile.id}`);
-            
+
+            // Mitigación del bucle de bloqueo permanente: si el dispositivo ya es conocido se le permite el acceso
+            if (userProfile.status === 'online' && !storedDeviceId && !knownDeviceToken) {
+                showToast("Tienes una sesión activa en otro dispositivo. Por favor, cierra la sesión en el otro equipo para ingresar aquí.", true);
+                if (userProfile.telegram_chat_id) {
+                    await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión fallido desde un dispositivo no autorizado porque la cuenta ya figura activa.`);
+                }
+                await _supabase.auth.signOut();
+                return;
+            }
+
             if (!knownDeviceToken) {
                 pendingDeviceUser = response.data.user;
                 pendingDeviceProfile = userProfile;
@@ -756,6 +779,34 @@ document.getElementById('btn-recovery-next').onclick = async () => {
     }
 };
 
+document.getElementById('btn-recovery-next').onclick = async () => {
+    try {
+        const iden = document.getElementById('recovery-identifier').value.trim();
+        if (!iden) {
+            showToast("Por favor, ingresa tu usuario o ID V-Chat", true);
+            return;
+        }
+        
+        const response = await _supabase
+            .from('users')
+            .select('*')
+            .or(`username.eq.${iden.toLowerCase()},vchat_id.eq.${iden.toUpperCase()}`)
+            .single();
+            
+        if (response.error || !response.data) {
+            showToast("Usuario o ID no registrado en la base de datos.", true);
+            return;
+        }
+        
+        currentUserRecovery = response.data; 
+        
+        document.getElementById('recovery-step-1').classList.add('hidden');
+        document.getElementById('recovery-method-select').classList.remove('hidden');
+    } catch (err) {
+        showToast(`Error de recuperación: ${err.message || err}`, true);
+    }
+};
+
 document.getElementById('btn-method-question').onclick = () => {
     document.getElementById('recovery-method-select').classList.add('hidden');
     document.getElementById('recovery-question-text').innerText = currentUserRecovery.secret_question;
@@ -825,7 +876,7 @@ document.getElementById('close-recovery-modal').onclick = () => {
 };
 
 // =======================================================
-// 5. CHAT Y MENSAJERÍA (CON CIFRADO DE EXTREMO A EXTREMO E2EE)
+// 5. CHAT Y MENSAJERÍA
 // =======================================================
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
@@ -904,7 +955,8 @@ async function loadMessages() {
                 let bodyHtml = ``;
                 if (m.media_type === 'text') {
                     const decryptedText = decryptMessage(m.text, m.sender_id, m.receiver_id);
-                    bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${decryptedText}</span>`;
+                    const safeText = escapeHTML(decryptedText);
+                    bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${safeText}</span>`;
                 } else if (m.media_type === 'image' && m.media_url) {
                     bodyHtml = `<img src="${m.media_url}" style="max-width:100%; max-height:220px; border-radius:12px; margin-bottom:4px; cursor:pointer;" onclick="window.open('${m.media_url}', '_blank')">`;
                 } else if (m.media_type === 'audio' && m.media_url) {
@@ -941,7 +993,8 @@ function appendMessageToUI(m) {
     let bodyHtml = ``;
     if (m.media_type === 'text') {
         const decryptedText = decryptMessage(m.text, m.sender_id, m.receiver_id);
-        bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${decryptedText}</span>`;
+        const safeText = escapeHTML(decryptedText);
+        bodyHtml = `<span class="msg-text" style="word-wrap:break-word;">${safeText}</span>`;
     } else if (m.media_type === 'image' && m.media_url) {
         bodyHtml = `<img src="${m.media_url}" style="max-width:100%; max-height:220px; border-radius:12px; margin-bottom:4px; cursor:pointer;" onclick="window.open('${m.media_url}', '_blank')">`;
     } else if (m.media_type === 'audio' && m.media_url) {
@@ -1275,13 +1328,17 @@ if (newContactInput) {
                         ? u.avatar_url 
                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=00bfa5&color=fff`;
 
+                    const safeName = escapeHTML(u.name);
+                    const safeUsername = escapeHTML(u.username);
+                    const safeVchatId = escapeHTML(u.vchat_id);
+
                     return `
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid var(--border-light);">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <img src="${avatarSrc}" class="avatar-sm" alt="Avatar">
                                 <div>
-                                    <strong style="font-size: 13.5px; color: var(--text-main); display: block;">${u.name}</strong>
-                                    <span style="font-size: 11px; color: var(--text-sec);">@${u.username} • ${u.vchat_id}</span>
+                                    <strong style="font-size: 13.5px; color: var(--text-main); display: block;">${safeName}</strong>
+                                    <span style="font-size: 11px; color: var(--text-sec);">@${safeUsername} • ${safeVchatId}</span>
                                 </div>
                             </div>
                             <div>
@@ -1353,11 +1410,12 @@ async function loadIncomingRequests() {
     
     container.innerHTML = data.map(r => {
         const sender = r.users;
+        const safeSenderName = escapeHTML(sender.name);
         return `
             <div class="request-item" style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--chat-bg); border-radius:12px; margin-bottom:8px; border:1px solid var(--border-light);">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <img src="${sender.avatar_url}" class="avatar-sm">
-                    <strong style="font-size:14px; color:var(--text-main);">${sender.name}</strong>
+                    <strong style="font-size:14px; color:var(--text-main);">${safeSenderName}</strong>
                 </div>
                 <div style="display:flex; gap:6px;">
                     <button onclick="window.respondRequest('${r.id}', 'accepted')" style="background:var(--vchat-green); border:none; color:white; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:bold;">Aceptar</button>
@@ -1584,7 +1642,10 @@ async function loadStatuses() {
             const hasHeart = c.text.endsWith(" ❤️");
             const cleanText = hasHeart ? c.text.substring(0, c.text.length - 2) : c.text;
 
-            const formattedText = cleanText.replace(/@([A-Za-z0-9_À-ÿ]+(?:\s+[A-Za-z0-9_À-ÿ]+)?)/g, '<span class="mention-tag">@$1</span>');
+            // Escapamos los comentarios para evitar inyección HTML / XSS
+            const safeCommentName = escapeHTML(c.user_name);
+            const safeCommentText = escapeHTML(cleanText);
+            const formattedText = safeCommentText.replace(/@([A-Za-z0-9_À-ÿ]+(?:\s+[A-Za-z0-9_À-ÿ]+)?)/g, '<span class="mention-tag">@$1</span>');
             
             return `
                 <div class="comment-wrapper" id="comment-wrapper-${c.id}">
@@ -1603,7 +1664,7 @@ async function loadStatuses() {
                          onclick="window.toggleCommentSwipe('${c.id}')"
                          style="font-size: 12.5px; background: #1f2c34 !important; padding: 8px 12px; border-radius: 10px; border-left:2px solid var(--vchat-green); display: flex; justify-content: space-between; align-items: center; user-select:none; -webkit-user-select:none;">
                         <div>
-                            <strong style="color: var(--vchat-green); display: inline-flex; align-items: center; gap: 4px;">${c.user_name}:</strong>
+                            <strong style="color: var(--vchat-green); display: inline-flex; align-items: center; gap: 4px;">${safeCommentName}:</strong>
                             <span style="color: var(--text-main); word-wrap: break-word;">${formattedText}</span>
                             ${hasHeart ? `<span style="margin-left: 6px; color: #ff3b30; font-size:11px;">❤️</span>` : ''}
                         </div>
@@ -1620,13 +1681,16 @@ async function loadStatuses() {
 
         const inputId = `comment-input-${s.id}`;
 
+        const safeStatusUser = escapeHTML(s.user_name);
+        const safeStatusText = escapeHTML(s.text);
+
         return `
             <div class="status-card" style="margin-bottom: 16px; padding: 16px; background: var(--hover-bg); border-radius: 16px; border: 1px solid var(--border-light); position: relative;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <img src="${s.user_avatar || 'https://ui-avatars.com/api/?name=' + s.user_name}" class="avatar-sm">
                         <div>
-                            <strong style="font-size: 14px; color: var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${s.user_name}</strong>
+                            <strong style="font-size: 14px; color: var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${safeStatusUser}</strong>
                             <p style="font-size: 10px; color: var(--text-sec);">${new Date(s.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                         </div>
                     </div>
@@ -1638,7 +1702,7 @@ async function loadStatuses() {
                     ` : ''}
                 </div>
 
-                ${s.text ? `<p style="font-size: 13.5px; color: var(--text-main); line-height:1.4; word-wrap:break-word;">${s.text}</p>` : ''}
+                ${s.text ? `<p style="font-size: 13.5px; color: var(--text-main); line-height:1.4; word-wrap:break-word;">${safeStatusText}</p>` : ''}
                 ${mediaHtml}
 
                 <div style="height: 1px; background: var(--border-light); margin: 12px 0 8px 0;"></div>
@@ -2102,22 +2166,23 @@ if (testTgBtn) {
     };
 }
 
-// INTEGRACIÓN: Alternar privacidad (Ocultar/Desocultar Contactos para VIP)
+// INTEGRACIÓN: Alternar privacidad (Ocultar/Desocultar Contactos con Hash SHA-256 para VIP)
 window.toggleContactPrivacy = (contactId, name) => {
     if (!currentUser.is_premium) {
         showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
         return;
     }
     
-    const savedPin = localStorage.getItem(`vchat_private_pin_${currentUser.id}`);
-    if (!savedPin) {
+    const savedPinHash = localStorage.getItem(`vchat_private_pin_hash_${currentUser.id}`);
+    if (!savedPinHash) {
         const newPin = prompt("Para usar esta función, primero debes configurar tu PIN de seguridad de 4 dígitos:");
         if (!newPin) return;
         if (newPin.length !== 4 || isNaN(newPin)) {
             showToast("El PIN debe ser exactamente de 4 dígitos numéricos.", true);
             return;
         }
-        localStorage.setItem(`vchat_private_pin_${currentUser.id}`, newPin);
+        const hashed = CryptoJS.SHA256(newPin).toString();
+        localStorage.setItem(`vchat_private_pin_hash_${currentUser.id}`, hashed);
         showToast("¡PIN de seguridad configurado con éxito!");
     }
     
@@ -2163,12 +2228,14 @@ function loadPrivateContactsList() {
             ? contact.avatar_url 
             : `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=00bfa5&color=fff`;
 
+        const safeContactName = escapeHTML(contact.name);
+
         return `
             <div id="private-item-${contact.id}" class="contact-item" style="display:flex; align-items:center; justify-content:space-between; gap:15px; padding:12px; background:var(--chat-bg); border-radius:12px; border:1px solid rgba(0, 191, 165, 0.2);" >
                 <div style="display:flex; align-items:center; gap:12px; cursor:pointer; flex:1;" onclick="window.startChat('${contact.id}', '${contact.name.replace(/'/g, "\\'")}', '${avatarSrc}'); document.getElementById('back-private').click();">
                     <img src="${avatarSrc}" class="avatar-sm">
                     <div>
-                        <strong style="font-size:14.5px; color:var(--text-main);">${contact.name}</strong>
+                        <strong style="font-size:14.5px; color:var(--text-main);">${safeContactName}</strong>
                         <p style="font-size:11px; color:var(--vchat-green); margin-top:2px;">Toca para abrir chat privado</p>
                     </div>
                 </div>
@@ -2242,7 +2309,7 @@ window.showChatView = () => {
     
     document.getElementById('chat-navbar').classList.remove('hidden');
     document.getElementById('messagesContainer').classList.remove('hidden');
-    document.getElementById('chat-footer').classList.remove('hidden');
+    document.getElementById('chat-footer').classList.add('hidden');
     
     document.getElementById('mainWindow').className = 'main-window view-chat';
 };
@@ -2491,10 +2558,11 @@ async function loadContacts() {
             
             let subTextHtml = `<p style="font-size:12px; color:var(--text-sec); margin-top:2px;">Toca para chatear</p>`;
             if (contact.listening_to && contact.listening_to.trim() !== '') {
+                const safeSong = escapeHTML(contact.listening_to);
                 subTextHtml = `
                     <p style="font-size:12px; color:var(--vchat-green); margin-top:2px; display:flex; align-items:center; gap:5px; font-weight: 500;">
                         <i class="fas fa-music" style="font-size:10px; animation: pulse 1.5s infinite ease-in-out;"></i>
-                        <span style="font-style:italic; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Escuchando: ${contact.listening_to}</span>
+                        <span style="font-style:italic; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Escuchando: ${safeSong}</span>
                     </p>
                 `;
             }
@@ -2503,11 +2571,13 @@ async function loadContacts() {
                 ? contact.avatar_url 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=00bfa5&color=fff`;
 
+            const safeContactName = escapeHTML(contact.name);
+
             const itemHtml = `
                 <img id="contact-avatar-img-${contact.id}" src="${avatarSrc}" class="avatar-sm" alt="Avatar">
                 <div style="flex:1;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${contact.name}${vipCrownHtml}</strong>
+                        <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${safeContactName}${vipCrownHtml}</strong>
                         <span style="font-size:10px; color:${isOnline ? 'var(--vchat-green)' : 'var(--text-sec)'}; font-weight:bold;">
                             <i class="fas fa-circle" style="font-size:7px; margin-right:4px;"></i>${isOnline ? 'en línea' : 'offline'}
                         </span>
@@ -2545,10 +2615,11 @@ async function loadContacts() {
             
             let subTextHtml = `<p style="font-size:12px; color:var(--vchat-green); margin-top:2px;">Chat Directo (No Agregado)</p>`;
             if (u.listening_to && u.listening_to.trim() !== '') {
+                const safeSong = escapeHTML(u.listening_to);
                 subTextHtml = `
                     <p style="font-size:12px; color:var(--vchat-green); margin-top:2px; display:flex; align-items:center; gap:5px; font-weight: 500;">
                         <i class="fas fa-music" style="font-size:10px; animation: pulse 1.5s infinite ease-in-out;"></i>
-                        <span style="font-style:italic; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Escuchando: ${u.listening_to}</span>
+                        <span style="font-style:italic; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Escuchando: ${safeSong}</span>
                     </p>
                 `;
             }
@@ -2557,11 +2628,13 @@ async function loadContacts() {
                 ? u.avatar_url 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=00bfa5&color=fff`;
 
+            const safeNonContactName = escapeHTML(u.name);
+
             const itemHtml = `
                 <img src="${avatarSrc}" class="avatar-sm" alt="Avatar">
                 <div style="flex:1;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${u.name}${vipCrownHtml}</strong>
+                        <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${safeNonContactName}${vipCrownHtml}</strong>
                         <span style="font-size:10px; color:${isOnline ? 'var(--vchat-green)' : 'var(--text-sec)'}; font-weight:bold;">
                             <i class="fas fa-circle" style="font-size:7px; margin-right:4px;"></i>${isOnline ? 'en línea' : 'offline'}
                         </span>
@@ -2598,9 +2671,10 @@ async function loadContacts() {
                 settingsManager.innerHTML = contactsData.map(c => {
                     const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
                     if (!contact) return '';
+                    const safeContactName = escapeHTML(contact.name);
                     return `
                         <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.02);">
-                            <span style="font-size:13px; color:var(--text-main); font-weight:500;">${contact.name}</span>
+                            <span style="font-size:13px; color:var(--text-main); font-weight:500;">${safeContactName}</span>
                             <i class="fas fa-trash-alt" onclick="window.deleteContact('${contact.id}', '${contact.name}')" style="color:#ff3b30; cursor:pointer; font-size:13px;" title="Eliminar Contacto"></i>
                         </div>
                     `;

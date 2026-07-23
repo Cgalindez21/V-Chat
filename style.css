@@ -47,12 +47,10 @@ body {
 .auth-overlay {
     position: fixed;
     inset: 0;
-    /* Imagen de fondo centrada con capas de degradado oscuro para el contraste */
     background: linear-gradient(rgba(9, 14, 17, 0.65), rgba(9, 14, 17, 0.8)), url('background-login.jpg') no-repeat center center;
     background-size: cover;
     display: flex;
     align-items: center;
-    /* Centrado absoluto de la tarjeta */
     justify-content: center;
     z-index: 10001;
 }
@@ -63,7 +61,7 @@ body {
     -webkit-backdrop-filter: blur(25px);
     padding: 45px 35px;
     border-radius: 24px;
-    width: 380px; /* Ancho ajustado vertical estilizado */
+    width: 380px;
     text-align: center;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -108,7 +106,7 @@ body {
 
 .auth-input-group input {
     width: 100% !important;
-    padding: 14px 16px 14px 46px !important; /* Padding izquierdo extra para dar espacio al icono */
+    padding: 14px 16px 14px 46px !important;
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-radius: 12px !important;
@@ -137,10 +135,10 @@ body {
 
 .btn-main {
     padding: 14px 20px !important;
-    background: linear-gradient(135deg, #184785, #0f2d59) !important; /* Degradado azul marino profundo */
+    background: linear-gradient(135deg, #184785, #0f2d59) !important;
     color: white !important;
     border: none !important;
-    border-radius: 30px !important; /* Forma redondeada de píldora */
+    border-radius: 30px !important;
     font-weight: 600 !important;
     font-size: 15px !important;
     cursor: pointer !important;
@@ -348,18 +346,17 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Suavizado de oscurecimiento al 45% - 65% para resaltar los detalles de fondo */
     background: linear-gradient(rgba(11, 20, 26, 0.45), rgba(11, 20, 26, 0.65)), url('background-app.jpg') no-repeat center center !important;
     background-size: cover !important;
 }
 
 .feed-mobile-header {
-    display: none; /* Oculto en computadoras de escritorio */
+    display: none;
 }
 
 .feed-content-wrapper {
     width: 100%;
-    max-width: 600px; /* Columna central estilo Facebook */
+    max-width: 600px;
     animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -425,12 +422,10 @@ body {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    /* Suavizado para que brille sutilmente la red tras las burbujas */
     background: linear-gradient(rgba(11, 20, 26, 0.5), rgba(11, 20, 26, 0.65)), url('background-app.jpg') no-repeat center center !important;
     background-size: cover !important;
 }
 
-/* Burbujas */
 .msg {
     max-width: 65%;
     padding: 10px 16px;
@@ -463,7 +458,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
-/* Footer */
 .chat-footer {
     background: var(--sidebar-bg);
     border-top: 1px solid var(--border-light);
@@ -587,7 +581,6 @@ body {
     padding: 24px;
 }
 
-/* Tarjetas de historias (Estilo Facebook Feed) */
 .status-card {
     background: #111b21 !important;
     padding: 20px;
@@ -602,7 +595,7 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* ========== COMENTARIOS DESLIZABLES (SWIPE PANEL CORREGIDO) ========== */
+/* ========== COMENTARIOS DESLIZABLES ========== */
 .comment-wrapper {
     position: relative;
     overflow: hidden;
@@ -611,11 +604,10 @@ body {
     width: 100%;
 }
 
-/* Fondo opaco obligatorio para que oculte las acciones de Telegram/Heart ubicadas detrás */
 .comment-item {
     position: relative;
     z-index: 2;
-    background: #1f2c34 !important; /* Fondo gris sólido para ocultar la capa de atrás */
+    background: #1f2c34 !important;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100%;
 }
@@ -666,7 +658,6 @@ body {
     color: var(--vchat-green);
 }
 
-/* ETIQUETA PROFESIONAL DE MENCIÓN (NUEVO) */
 .mention-tag {
     color: var(--vchat-green) !important;
     font-weight: 700 !important;
@@ -705,7 +696,7 @@ body {
     text-transform: uppercase;
 }
 
-/* ========== MODALES (GLASSMORPHISM) ========== */
+/* ========== MODALES ========== */
 .modal-overlay {
     position: fixed;
     inset: 0;
