@@ -2463,22 +2463,62 @@ async function loadContacts() {
             item.style.borderRadius = '14px';
             item.style.marginBottom = '6px';
             item.style.transition = 'all 0.2s';
+            item.style.userSelect = 'none';
+            item.style.webkitUserSelect = 'none';
             item.innerHTML = itemHtml;
 
-            // ABRE EL CHAT INMEDIATAMENTE AL PRESIONAR
-            item.onclick = (e) => {
-                e.stopPropagation();
-                window.startChat(contact.id, contact.name, avatarSrc);
-            };
+            // DETECTOR TÁCTIL DEDICADO PARA MÓVILES (1 TOQUE Y 2 TOQUES RÁPIDOS)
+            let lastTapTime = 0;
+            let tapTimeout = null;
 
-            // PERMITE OCULTAR ÚNICAMENTE A USUARIOS PREMIUM VIP HACIENDO DOBLE CLIC
-            if (currentUser && currentUser.is_premium) {
-                item.ondblclick = (e) => {
+            item.addEventListener('touchend', (e) => {
+                const currentTime = Date.now();
+                const tapLength = currentTime - lastTapTime;
+
+                if (tapLength < 400 && tapLength > 0) {
+                    // DOBLE TOQUE TÁCTIL EN TELÉFONO
+                    e.preventDefault();
                     e.stopPropagation();
-                    window.toggleContactPrivacy(contact.id, contact.name);
-                };
-            }
-            
+                    clearTimeout(tapTimeout);
+                    lastTapTime = 0;
+
+                    if (currentUser && currentUser.is_premium) {
+                        window.toggleContactPrivacy(contact.id, contact.name);
+                    }
+                } else {
+                    // UN SOLO TOQUE EN TELÉFONO
+                    lastTapTime = currentTime;
+                    clearTimeout(tapTimeout);
+                    tapTimeout = setTimeout(() => {
+                        window.startChat(contact.id, contact.name, avatarSrc);
+                    }, 280);
+                }
+            }, { passive: false });
+
+            // CLIC DIRECTO PARA COMPUTADORAS (MOUSE)
+            item.addEventListener('click', (e) => {
+                if (e.detail === 0) return; // Ignorar clics sintéticos de toques móviles
+                
+                if (currentUser && currentUser.is_premium) {
+                    const currentTime = Date.now();
+                    const tapLength = currentTime - lastTapTime;
+
+                    if (tapLength < 400 && tapLength > 0) {
+                        clearTimeout(tapTimeout);
+                        lastTapTime = 0;
+                        window.toggleContactPrivacy(contact.id, contact.name);
+                    } else {
+                        lastTapTime = currentTime;
+                        clearTimeout(tapTimeout);
+                        tapTimeout = setTimeout(() => {
+                            window.startChat(contact.id, contact.name, avatarSrc);
+                        }, 280);
+                    }
+                } else {
+                    window.startChat(contact.id, contact.name, avatarSrc);
+                }
+            });
+
             container.appendChild(item);
         });
 
