@@ -20,6 +20,7 @@ let recordTimer = null;
 let selectedLocalSongFile = null;
 
 let failedLoginAttempts = 0;
+let activeSessionLoginAttempts = 0; // Control de intentos de inicio sobre sesión activa
 
 let generatedRecoveryCode = null;
 let currentUserRecovery = null;
@@ -408,7 +409,7 @@ window.openEmojiPicker = (targetId, isReaction = false) => {
 };
 
 // =======================================================
-// 4. AUTENTICACIÓN Y SEGURIDAD (CORREGIDO EVITANDO STALE LOCKOUT)
+// 4. AUTENTICACIÓN Y SEGURIDAD (CON CONTROL DE BLOQUEO PREVENTIVO)
 // =======================================================
 const authForm = document.getElementById('auth-form');
 const toggleLink = document.getElementById('toggle-link');
@@ -570,6 +571,7 @@ authForm.onsubmit = async (e) => {
     requestNotificationPermission();
     let iden = document.getElementById('login-identifier').value.trim().toLowerCase();
     const pass = document.getElementById('reg-password').value;
+    let userProfile = null; // Declaración de alcance de variable raíz para usar en el bloque catch
 
     try {
         if (isRegistering) {
@@ -603,35 +605,79 @@ authForm.onsubmit = async (e) => {
             }
 
             // 1. Obtener el perfil del usuario para validar su existencia
-            const { data: userProfile, error: profileErr } = await _supabase
+            const { data: fetchedProfile, error: profileErr } = await _supabase
                 .from('users')
                 .select('*')
                 .eq('username', iden)
                 .maybeSingle();
 
-            if (profileErr || !userProfile) {
+            if (profileErr || !fetchedProfile) {
                 showToast("Usuario o contraseña incorrectos. Por favor, verifica tus datos.", true);
                 return;
             }
+            userProfile = fetchedProfile; // Asignación de variable de alcance raíz
 
             // 2. Intentar autenticar con Supabase Auth primero (valida la contraseña)
             const email = `${iden}@vchat.app`;
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
             if (response.error) throw response.error;
 
+            // Al autenticar exitosamente, se resetea el contador de intentos de contraseña incorrectos
+            failedLoginAttempts = 0;
+
             // 3. Una vez validada la contraseña, se verifica el control de dispositivos
             const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
             const knownDeviceToken = localStorage.getItem(`vchat_known_device_token_${userProfile.id}`);
 
-            // Mitigación del bucle de bloqueo permanente: si el dispositivo ya es conocido se le permite el acceso
-            if (userProfile.status === 'online' && !storedDeviceId && !knownDeviceToken) {
-                showToast("Tienes una sesión activa en otro dispositivo. Por favor, cierra la sesión en el otro equipo para ingresar aquí.", true);
-                if (userProfile.telegram_chat_id) {
-                    await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión fallido desde un dispositivo no autorizado porque la cuenta ya figura activa.`);
+            // Validación de sesión activa en otro dispositivo
+            if (userProfile.status === 'online' && !storedDeviceId) {
+                activeSessionLoginAttempts++;
+
+                if (activeSessionLoginAttempts < 3) {
+                    showToast("Tienes una sesión activa en otro dispositivo. Te invitamos a cerrar la sesión en el equipo donde la tengas abierta para ingresar aquí.", true);
+                    if (userProfile.telegram_chat_id) {
+                        await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde otro equipo mientras mantienes tu sesión abierta.`);
+                    }
+                    await _supabase.auth.signOut();
+                    return;
+                } else {
+                    // BLOQUEO PREVENTIVO: Se han completado 3 intentos con sesión activa abierta
+                    activeSessionLoginAttempts = 0;
+                    
+                    // Forzar cierre de sesión en base de datos
+                    await _supabase.from('users').update({ status: 'offline' }).eq('id', userProfile.id);
+
+                    // Forzar flujo de verificación de identidad de dispositivo
+                    pendingDeviceUser = response.data.user;
+                    pendingDeviceProfile = userProfile;
+                    
+                    if (userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
+                        pendingDeviceOtp = Math.floor(100000 + Math.random() * 900000);
+                        
+                        document.getElementById('device-otp-view').classList.remove('hidden');
+                        document.getElementById('device-question-view').classList.add('hidden');
+                        document.getElementById('device-otp-code').value = '';
+                        
+                        showToast("Bloqueo preventivo: Sesión anterior cerrada. Verificando por Telegram...", true);
+                        await sendTelegramMessage(userProfile.telegram_chat_id, `🚨 <b>Bloqueo Preventivo V-Chat</b>\n\nSe ha forzado el cierre de tu sesión activa debido a múltiples intentos de acceso.\n\nCódigo de autorización para este dispositivo: <b>${pendingDeviceOtp}</b>`);
+                        
+                        document.getElementById('device-auth-modal').classList.remove('hidden');
+                        return;
+                    } else {
+                        document.getElementById('device-otp-view').classList.add('hidden');
+                        document.getElementById('device-question-view').classList.remove('hidden');
+                        document.getElementById('device-question-label').innerText = userProfile.secret_question || "¿Cuál es tu pregunta secreta?";
+                        document.getElementById('device-answer-input').value = '';
+                        
+                        showToast("Bloqueo preventivo: Sesión anterior cerrada. Responde la pregunta de seguridad.", true);
+                        document.getElementById('device-auth-modal').classList.remove('hidden');
+                        return;
+                    }
                 }
-                await _supabase.auth.signOut();
-                return;
             }
+
+            // Si pasa la validación de sesión activa se restablece el contador de intentos por duplicidad
+            activeSessionLoginAttempts = 0;
 
             if (!knownDeviceToken) {
                 pendingDeviceUser = response.data.user;
@@ -666,19 +712,43 @@ authForm.onsubmit = async (e) => {
             }
         }
     } catch (err) { 
-        let friendlyMsg = err.message;
-        if (err.message.includes("Invalid login credentials") || err.message.includes("does not match") || err.message.includes("invalid_grant")) {
+        let errMsg = err && err.message ? err.message : String(err || '');
+        let friendlyMsg = errMsg;
+
+        if (errMsg.includes("Invalid login credentials") || errMsg.includes("does not match") || errMsg.includes("invalid_grant")) {
             friendlyMsg = "Usuario o contraseña incorrectos. Por favor, verifica tus datos.";
             
             if (!isRegistering) {
                 failedLoginAttempts++;
                 if (failedLoginAttempts >= 3) {
                     failedLoginAttempts = 0;
-                    showToast("Intentos fallidos excedidos. Redirigiendo a recuperación...", true);
+                    
+                    // Bloqueo preventivo en base de datos al fallar contraseña
+                    if (userProfile && userProfile.id) {
+                        try {
+                            await _supabase.from('users').update({ status: 'offline' }).eq('id', userProfile.id);
+                        } catch (e) {
+                            console.warn("Fallo al actualizar estado offline en bloqueo preventivo de clave:", e);
+                        }
+
+                        // Enviar alerta preventiva al bot de Telegram del usuario si está registrado
+                        if (userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
+                            try {
+                                await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Bloqueo Preventivo V-Chat</b>\n\nTu cuenta ha sido bloqueada preventivamente debido a 3 intentos fallidos de inicio de sesión para evitar accesos sospechosos.\n\nPor favor, verifica tu identidad mediante el método de recuperación en la aplicación.`);
+                            } catch (tgErr) {
+                                console.warn("Fallo al enviar alerta preventiva a Telegram:", tgErr);
+                            }
+                        }
+                    }
+
+                    showToast("Bloqueo preventivo: Intentos fallidos excedidos. Redirigiendo a recuperación...", true);
                     setTimeout(() => {
-                        document.getElementById('recovery-identifier').value = iden;
-                        document.getElementById('recovery-modal').classList.remove('hidden');
-                        document.getElementById('btn-recovery-next').click();
+                        const recId = document.getElementById('recovery-identifier');
+                        if (recId) recId.value = iden;
+                        const recModal = document.getElementById('recovery-modal');
+                        if (recModal) recModal.classList.remove('hidden');
+                        const nextBtn = document.getElementById('btn-recovery-next');
+                        if (nextBtn) nextBtn.click();
                     }, 2000);
                     return;
                 }
@@ -749,34 +819,6 @@ if (btnCancelDevice) {
 
 document.getElementById('forgot-password-link').onclick = () => {
     document.getElementById('recovery-modal').classList.remove('hidden');
-};
-
-document.getElementById('btn-recovery-next').onclick = async () => {
-    try {
-        const iden = document.getElementById('recovery-identifier').value.trim();
-        if (!iden) {
-            showToast("Por favor, ingresa tu usuario o ID V-Chat", true);
-            return;
-        }
-        
-        const response = await _supabase
-            .from('users')
-            .select('*')
-            .or(`username.eq.${iden.toLowerCase()},vchat_id.eq.${iden.toUpperCase()}`)
-            .single();
-            
-        if (response.error || !response.data) {
-            showToast("Usuario o ID no registrado en la base de datos.", true);
-            return;
-        }
-        
-        currentUserRecovery = response.data; 
-        
-        document.getElementById('recovery-step-1').classList.add('hidden');
-        document.getElementById('recovery-method-select').classList.remove('hidden');
-    } catch (err) {
-        showToast(`Error de recuperación: ${err.message || err}`, true);
-    }
 };
 
 document.getElementById('btn-recovery-next').onclick = async () => {
@@ -1767,7 +1809,7 @@ window.handleCommentTouchEnd = (e, commentId) => {
 };
 
 window.toggleCommentSwipe = (commentId) => {
-    const item = document.getElementById(`comment-item-${commentId}`);
+    const item = document.getElementById('comment-item-' + commentId);
     if (item) {
         item.style.transition = "transform 0.2s ease";
         if (item.classList.contains('swiped-left')) {
@@ -2329,7 +2371,7 @@ async function handleUrlActions() {
     } else if (rejectId) {
         const { error } = await _supabase.from('contacts').delete().eq('id', rejectId);
         if (!error) {
-            showToast("Solicitud de amistad rechazada");
+            showToast("Solicitud de amistad de rechazada");
             window.history.replaceState({}, document.title, window.location.pathname);
             window.lastContactsSignature = "";
             loadContacts();
@@ -2599,7 +2641,7 @@ async function loadContacts() {
             item.style.transition = 'all 0.2s';
             item.innerHTML = itemHtml;
 
-            // ABRE EL CHAT INMEDIATAMENTE CON UN CLIC
+            // ABRE EL CHAT CON UN CLIC
             item.onclick = (e) => {
                 e.stopPropagation();
                 window.startChat(contact.id, contact.name, avatarSrc, contact);
