@@ -197,6 +197,18 @@
                 <p style="color: var(--text-main); font-weight: bold;">Manual de funciones según el tipo de cuenta:</p>
                 <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; border: 1px solid var(--border-light); max-height: 340px; overflow-y: auto;">
                     
+                    <!-- NUEVA SECCIÓN DE SEGURIDAD GENERAL DE CUENTAS (FREE & PREMIUM) -->
+                    <div style="margin-bottom: 18px;">
+                        <h4 style="color: #00bfa5; font-size: 13.5px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(0,191,165,0.3); padding-bottom: 4px;">
+                            <i class="fas fa-user-lock"></i> 🛡️ SEGURIDAD Y PRIVACIDAD GENERAL (FREE & VIP)
+                        </h4>
+                        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px;">
+                            <li>• <b>Protección Anti-XSS:</b> Filtro activo de desinfección de entrada para evitar inyección de código y robo de credenciales en mensajes, nombres e historias.</li>
+                            <li>• <b>Cierre y Bloqueo Preventivo:</b> Si se detectan intentos de acceso sospechosos (3 intentos fallidos de contraseña o duplicidad de sesión activa), el sistema desconecta la cuenta anterior y exige validación mediante código OTP en Telegram o pregunta de seguridad.</li>
+                            <li>• <b>Seguridad de Datos:</b> Configuración de Row Level Security (RLS) granular en el servidor para evitar que usuarios no autorizados lean o modifiquen chats de terceros.</li>
+                        </ul>
+                    </div>
+
                     <div style="margin-bottom: 18px;">
                         <h4 style="color: var(--vchat-green); font-size: 13.5px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(0,191,165,0.2); padding-bottom: 4px;">
                             <i class="fas fa-gift"></i> 🆓 FUNCIONES GRATUITAS (FREE)
@@ -218,8 +230,9 @@
                             <i class="fas fa-crown"></i> 👑 FUNCIONES EXCLUSIVAS (PREMIUM VIP)
                         </h4>
                         <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px;">
-                            <li>• <b>Ocultar Chats en V-Privados:</b> Toca la foto de perfil del contacto en el chat y activa el interruptor de privacidad. Escribe tu PIN de 4 dígitos en el buscador para abrir tu bóveda secreta.</li>
-                            <li>• <b>Sin Publicidad:</b> Navegación y chats libres de banners publicitarios.</li>
+                            <li>• <b>Ocultar Chats en V-Privados:</b> Oculta conversaciones de la bandeja pública. Para acceder, digita tu PIN de 4 dígitos en el buscador.</li>
+                            <li>• <b>Bóveda Hashed de PIN:</b> Para máxima seguridad, tu PIN de acceso se guarda encriptado mediante algoritmos SHA-256 de una sola vía en tu equipo.</li>
+                            <li>• <b>Sin Publicidad:</b> Navegación y chats 100% libres de banners publicitarios.</li>
                             <li>• <b>Videos Extendidos en Historias:</b> Publica videos de larga duración de hasta 10 minutos en V-Moments.</li>
                             <li>• <b>Insignia VIP:</b> Corona dorada de usuario VIP visible en tu nombre de perfil y chats.</li>
                         </ul>
