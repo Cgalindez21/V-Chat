@@ -159,6 +159,31 @@
         </div>
     </div>
 
+    <!-- MODAL DE PERFIL Y PRIVACIDAD DEL CONTACTO (NUEVO) -->
+    <div id="contact-info-modal" class="modal-overlay hidden" style="z-index: 10006;">
+        <div class="modal-card" style="text-align: center; width: 380px;">
+            <img id="info-contact-avatar" src="" class="avatar-lg" style="margin: 0 auto 15px auto; display: block;">
+            <h3 id="info-contact-name" style="margin-bottom: 4px; font-size: 20px;">Contacto</h3>
+            <p id="info-contact-username" style="font-size: 13px; color: var(--vchat-green); font-weight: bold; margin-bottom: 18px;"></p>
+            
+            <!-- INTERRUPTOR SWITCH DE V-PRIVADOS -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); padding: 14px 18px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <div style="text-align: left;">
+                    <strong style="font-size: 13.5px; color: var(--text-main); display: block;"><i class="fas fa-user-shield" style="color: var(--vchat-green);"></i> Ocultar en V-Privados</strong>
+                    <span style="font-size: 11px; color: var(--text-sec);">Oculta este chat de la lista pública</span>
+                </div>
+                <label class="switch" style="position: relative; display: inline-block; width: 46px; height: 24px; flex-shrink: 0;">
+                    <input type="checkbox" id="toggle-private-switch">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 10px;">
+                <button id="close-info-modal" class="btn-secondary" style="width: 100%;">Cerrar Ventana</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL INFORMATIVO DE V-NOVEDADES -->
     <div id="changelog-modal" class="modal-overlay hidden" style="z-index: 10003;">
         <div class="modal-card" style="width: 460px; border-left: 5px solid var(--vchat-green);">
@@ -193,7 +218,7 @@
                             <i class="fas fa-crown"></i> 👑 FUNCIONES EXCLUSIVAS (PREMIUM VIP)
                         </h4>
                         <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px;">
-                            <li>• <b>Ocultar Chats en V-Privados:</b> Doble toque en un contacto para ocultarlo. Escribe tu PIN de 4 dígitos en el buscador para abrir tu bóveda secreta y gestionarlos.</li>
+                            <li>• <b>Ocultar Chats en V-Privados:</b> Toca la foto de perfil del contacto en el chat y activa el interruptor de privacidad. Escribe tu PIN de 4 dígitos en el buscador para abrir tu bóveda secreta.</li>
                             <li>• <b>Sin Publicidad:</b> Navegación y chats 100% libres de banners publicitarios.</li>
                             <li>• <b>Videos Extendidos en Historias:</b> Publica videos de larga duración de hasta 10 minutos en V-Moments.</li>
                             <li>• <b>Insignia VIP:</b> Corona dorada de usuario VIP visible en tu nombre de perfil y chats.</li>
@@ -408,7 +433,7 @@
                 </div>
 
                 <header class="chat-navbar hidden" id="chat-navbar">
-                    <div class="chat-target-info">
+                    <div class="chat-target-info" id="chat-target-info-trigger" style="cursor: pointer;" title="Toca para ver el perfil del contacto">
                         <button id="mobile-back-btn" style="background: none; border: none; font-size: 20px; color: var(--text-main); cursor: pointer; display: none; margin-right: 15px;">
                             <i class="fas fa-arrow-left"></i>
                         </button>
@@ -451,7 +476,7 @@
         </div>
     </div>
 
-    <!-- MODAL AÑADIR CONTACTO (BÚSQUEDA PÚBLICA EN TIEMPO REAL) -->
+    <!-- MODAL AÑADIR CONTACTO -->
     <div id="contact-modal" class="modal-overlay hidden">
         <div class="modal-card" style="width: 440px; max-height: 85vh; display: flex; flex-direction: column;">
             <h3><i class="fas fa-user-plus"></i> Añadir amigo</h3>

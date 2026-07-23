@@ -32,6 +32,8 @@ let commentStartX = 0;
 let commentCurrentX = 0;
 let searchDebounceTimer = null;
 
+let activeTargetUserObj = null;
+
 window.addEventListener('touchstart', () => { lastInteractionTime = Date.now(); }, { passive: true });
 window.addEventListener('click', () => { lastInteractionTime = Date.now(); }, { passive: true });
 window.addEventListener('keydown', () => { lastInteractionTime = Date.now(); }, { passive: true });
@@ -70,7 +72,7 @@ const EMOJI_DATA = {
     "Animales y naturaleza": ['🐵','🐶','🐺','🦊','🦝','🐱','🦁','🐯','🐴','🦄','ZEBRA','🐷','🐹','🐰','🐻','🐼','🐨','🐸','🐙','🐒','🐟','🐠','🐡','🦈','🦋','💮','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🍀'],
     "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
     "Actividades": ['🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎁','🏆','🏅','🥇','⚽','⚾','🥎','🏀','🏈','🎾','🎱','🎯','🎮','🕹️','🎰','🎲','🧩','🧸','♠️','♥️','♦️','♣️','♟️','🎨','🎭','🎬'],
-    "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','🛶','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
+    "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','canoe','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
     "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞','🪟','🛋️','🪑','toilet','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
     "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️']
 };
@@ -228,7 +230,68 @@ function initNavigation() {
         await _supabase.auth.signOut();
         location.reload();
     };
+
+    // APERTURA DEL MODAL DE INFORMACIÓN Y PRIVACIDAD AL TOCAR LA CABECERA DEL CHAT
+    const chatHeaderTrigger = document.getElementById('chat-target-info-trigger');
+    if (chatHeaderTrigger) {
+        chatHeaderTrigger.onclick = () => {
+            if (!activeTargetUserObj) return;
+            window.openContactInfoModal(activeTargetUserObj);
+        };
+    }
+
+    const closeInfoBtn = document.getElementById('close-info-modal');
+    if (closeInfoBtn) {
+        closeInfoBtn.onclick = () => {
+            document.getElementById('contact-info-modal').classList.add('hidden');
+        };
+    }
+
+    // MANEJADOR DEL INTERRUPTOR SWITCH DE PRIVACIDAD
+    const privateSwitch = document.getElementById('toggle-private-switch');
+    if (privateSwitch) {
+        privateSwitch.onchange = (e) => {
+            if (!currentUser || !currentUser.is_premium) {
+                e.preventDefault();
+                privateSwitch.checked = false;
+                showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
+                return;
+            }
+
+            if (!activeTargetUserObj) return;
+
+            window.toggleContactPrivacy(activeTargetUserObj.id, activeTargetUserObj.name);
+        };
+    }
 }
+
+// ABRIR Y POBLAR MODAL DE DETALLES DEL CONTACTO
+window.openContactInfoModal = (contact) => {
+    const modal = document.getElementById('contact-info-modal');
+    if (!modal) return;
+
+    const avatarImg = document.getElementById('info-contact-avatar');
+    const nameLabel = document.getElementById('info-contact-name');
+    const usernameLabel = document.getElementById('info-contact-username');
+    const switchInput = document.getElementById('toggle-private-switch');
+
+    const avatarSrc = (contact.avatar_url && contact.avatar_url.trim() !== '')
+        ? contact.avatar_url
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name)}&background=00bfa5&color=fff`;
+
+    avatarImg.src = avatarSrc;
+    nameLabel.innerText = contact.name;
+    usernameLabel.innerText = `@${contact.username || 'usuario'} • ${contact.vchat_id || ''}`;
+
+    // Verificar si el contacto ya está marcado como privado
+    const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
+    const privateList = JSON.parse(privateListStr);
+    const isPrivate = privateList.includes(contact.id);
+
+    switchInput.checked = isPrivate;
+
+    modal.classList.remove('hidden');
+};
 
 function togglePanel(id, show) {
     const p = document.getElementById(id);
@@ -2042,6 +2105,7 @@ if (testTgBtn) {
 // INTEGRACIÓN: Alternar privacidad (Ocultar/Desocultar Contactos para VIP)
 window.toggleContactPrivacy = (contactId, name) => {
     if (!currentUser.is_premium) {
+        showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
         return;
     }
     
@@ -2463,62 +2527,14 @@ async function loadContacts() {
             item.style.borderRadius = '14px';
             item.style.marginBottom = '6px';
             item.style.transition = 'all 0.2s';
-            item.style.userSelect = 'none';
-            item.style.webkitUserSelect = 'none';
             item.innerHTML = itemHtml;
 
-            // DETECTOR TÁCTIL DEDICADO PARA MÓVILES (1 TOQUE Y 2 TOQUES RÁPIDOS)
-            let lastTapTime = 0;
-            let tapTimeout = null;
-
-            item.addEventListener('touchend', (e) => {
-                const currentTime = Date.now();
-                const tapLength = currentTime - lastTapTime;
-
-                if (tapLength < 400 && tapLength > 0) {
-                    // DOBLE TOQUE TÁCTIL EN TELÉFONO
-                    e.preventDefault();
-                    e.stopPropagation();
-                    clearTimeout(tapTimeout);
-                    lastTapTime = 0;
-
-                    if (currentUser && currentUser.is_premium) {
-                        window.toggleContactPrivacy(contact.id, contact.name);
-                    }
-                } else {
-                    // UN SOLO TOQUE EN TELÉFONO
-                    lastTapTime = currentTime;
-                    clearTimeout(tapTimeout);
-                    tapTimeout = setTimeout(() => {
-                        window.startChat(contact.id, contact.name, avatarSrc);
-                    }, 280);
-                }
-            }, { passive: false });
-
-            // CLIC DIRECTO PARA COMPUTADORAS (MOUSE)
-            item.addEventListener('click', (e) => {
-                if (e.detail === 0) return; // Ignorar clics sintéticos de toques móviles
-                
-                if (currentUser && currentUser.is_premium) {
-                    const currentTime = Date.now();
-                    const tapLength = currentTime - lastTapTime;
-
-                    if (tapLength < 400 && tapLength > 0) {
-                        clearTimeout(tapTimeout);
-                        lastTapTime = 0;
-                        window.toggleContactPrivacy(contact.id, contact.name);
-                    } else {
-                        lastTapTime = currentTime;
-                        clearTimeout(tapTimeout);
-                        tapTimeout = setTimeout(() => {
-                            window.startChat(contact.id, contact.name, avatarSrc);
-                        }, 280);
-                    }
-                } else {
-                    window.startChat(contact.id, contact.name, avatarSrc);
-                }
-            });
-
+            // ABRE EL CHAT INMEDIATAMENTE CON UN CLIC
+            item.onclick = (e) => {
+                e.stopPropagation();
+                window.startChat(contact.id, contact.name, avatarSrc, contact);
+            };
+            
             container.appendChild(item);
         });
 
@@ -2568,7 +2584,7 @@ async function loadContacts() {
             item.innerHTML = itemHtml;
             
             item.onclick = () => {
-                window.startChat(u.id, u.name, avatarSrc);
+                window.startChat(u.id, u.name, avatarSrc, u);
             };
             
             container.appendChild(item);
@@ -2604,9 +2620,16 @@ _supabase.channel('realtime-users-presence')
         loadContacts();
     }).subscribe();
 
-window.startChat = (id, name, avatar) => {
+window.startChat = (id, name, avatar, contactObj = null) => {
     try {
         activeChatId = id;
+        
+        if (contactObj) {
+            activeTargetUserObj = contactObj;
+        } else {
+            activeTargetUserObj = { id: id, name: name, avatar_url: avatar };
+        }
+
         window.showChatView();
         
         const contactNameLabel = document.getElementById('active-contact-name');
