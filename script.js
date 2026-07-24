@@ -287,7 +287,7 @@ window.openContactInfoModal = (contact) => {
 
     const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
     const privateList = JSON.parse(privateListStr);
-    const isPrivate = privateList.includes(contact.id);
+    const isPrivate = privateList.some(id => String(id) === String(contact.id));
 
     switchInput.checked = isPrivate;
 
@@ -1571,8 +1571,7 @@ window.respondRequest = async (requestId, newStatus) => {
         }
         loadIncomingRequests();
         window.lastContactsSignature = "";
-        loadContacts();
-        loadStatuses();
+        loadContacts().then(() => loadStatuses());
     } catch (err) {
         showToast(err.message, true);
     }
@@ -1582,8 +1581,7 @@ _supabase.channel('realtime-contacts')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => {
         loadIncomingRequests();
         window.lastContactsSignature = "";
-        loadContacts();
-        loadStatuses();
+        loadContacts().then(() => loadStatuses());
     }).subscribe();
 
 // =======================================================
@@ -2369,8 +2367,9 @@ if (testTgBtn) {
     };
 }
 
+// TOGGLE CONTACT PRIVACY (V-PRIVADOS)
 window.toggleContactPrivacy = (contactId, name) => {
-    if (!currentUser.is_premium) {
+    if (!currentUser || !currentUser.is_premium) {
         showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
         return;
     }
@@ -2391,11 +2390,13 @@ window.toggleContactPrivacy = (contactId, name) => {
     const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
     let privateList = JSON.parse(privateListStr);
     
-    if (privateList.includes(contactId)) {
-        privateList = privateList.filter(id => id !== contactId);
+    const existsIndex = privateList.findIndex(id => String(id) === String(contactId));
+    
+    if (existsIndex !== -1) {
+        privateList.splice(existsIndex, 1);
         showToast(`${name} ahora se muestra en la lista pública`);
     } else {
-        privateList.push(contactId);
+        privateList.push(String(contactId));
         showToast(`${name} ha sido ocultado en V-Privados con éxito`);
     }
     
@@ -2420,10 +2421,15 @@ function loadPrivateContactsList() {
     
     const privateContacts = globalContacts.map(c => {
         const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
-        if (contact && privateList.includes(contact.id)) return contact;
+        if (contact && privateList.some(id => String(id) === String(contact.id))) return contact;
         return null;
     }).filter(Boolean);
     
+    if (privateContacts.length === 0) {
+        listContainer.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:12.5px; margin-top:20px;">No tienes ningún contacto privado oculto.</p>`;
+        return;
+    }
+
     listContainer.innerHTML = privateContacts.map(contact => {
         const avatarSrc = (contact.avatar_url && contact.avatar_url.trim() !== '') 
             ? contact.avatar_url 
@@ -2619,7 +2625,6 @@ async function showApp(user) {
         
         currentUser = profile;
 
-        // DESBLOQUEAR INTERFAZ DE FORMA INMEDIATA
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         
@@ -2655,7 +2660,6 @@ async function showApp(user) {
         initEmojiBars();
         window.lastContactsSignature = "";
         
-        // CARGA ASÍNCRONA NO BLOQUEANTE
         loadContacts().then(() => {
             loadStatuses();
         }).catch(console.warn);
@@ -2767,19 +2771,20 @@ async function loadContacts() {
         if (!container) return;
         container.innerHTML = '';
         
-        if (globalContacts.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:13px; margin-top:20px; padding:0 10px;">No tienes amigos agregados. Envía solicitudes usando su ID único.</p>`;
-            return;
-        }
+        let visibleContactsCount = 0;
         
         globalContacts.forEach(c => {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact) return;
             
-            if (privateList.includes(contact.id)) {
+            // EXCLUIR CONTACTOS OCULTOS EN V-PRIVADOS DE LA LISTA PÚBLICA
+            const isPrivateContact = privateList.some(id => String(id) === String(contact.id));
+            if (isPrivateContact) {
                 return;
             }
             
+            visibleContactsCount++;
+
             const isOnline = window.onlineUsersList && window.onlineUsersList.includes(contact.id);
             const isContactVip = contact.is_premium;
             const vipCrownHtml = isContactVip ? `<span class="vip-crown" title="Usuario VIP"><i class="fas fa-crown"></i></span>` : '';
@@ -2834,6 +2839,10 @@ async function loadContacts() {
             
             container.appendChild(item);
         });
+
+        if (visibleContactsCount === 0) {
+            container.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:13px; margin-top:20px; padding:0 10px;">No tienes contactos visibles en la lista pública.</p>`;
+        }
 
         const settingsManager = document.getElementById('settings-contacts-manager');
         if (settingsManager) {
