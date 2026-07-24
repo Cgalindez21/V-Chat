@@ -95,15 +95,21 @@ async function sendTelegramMessage(telegramChatId, text) {
     if (!telegramChatId || !TELEGRAM_BOT_TOKEN) return;
     try {
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-        await fetch(url, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: telegramChatId,
                 text: text,
-                parse_mode: 'HTML'
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
             })
         });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.warn("Error en Telegram API:", errorData);
+        }
     } catch (err) {
         console.warn("Fallo al enviar notificación de Telegram:", err);
     }
@@ -113,19 +119,18 @@ async function notifyUserViaTelegram(userId, text) {
     try {
         const { data: user, error } = await _supabase
             .from('users')
-            .select('status, telegram_chat_id')
+            .select('status, telegram_chat_id, name')
             .eq('id', userId)
             .single();
             
         if (error || !user) return;
         
-        if (user.status === 'online') {
+        if (!user.telegram_chat_id || user.telegram_chat_id.trim() === '') {
             return;
         }
         
-        if (user.telegram_chat_id) {
-            await sendTelegramMessage(user.telegram_chat_id, text);
-        }
+        await sendTelegramMessage(user.telegram_chat_id, text);
+        
     } catch (err) {
         console.warn("Fallo al verificar presencia para Telegram:", err);
     }
@@ -591,7 +596,6 @@ authForm.onsubmit = async (e) => {
             if (dbResult.error) throw dbResult.error;
             alert("¡Registro exitoso!"); location.reload();
         } else {
-            // NORMALIZAR IDENTIFICADOR
             if (iden.startsWith('id-')) {
                 const { data: userData, error: userErr = null } = await _supabase
                     .from('users')
@@ -603,7 +607,6 @@ authForm.onsubmit = async (e) => {
                 }
             }
 
-            // 1. OBTENER PERFIL DEL USUARIO
             const { data: fetchedProfile, error: profileErr } = await _supabase
                 .from('users')
                 .select('*')
@@ -616,21 +619,15 @@ authForm.onsubmit = async (e) => {
             }
             userProfile = fetchedProfile;
 
-            // 2. INTENTAR AUTENTICAR CON SUPABASE
             const email = `${iden}@vchat.app`;
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
             if (response.error) throw response.error;
 
-            // RESETEAR CONTADOR DE INTENTOS FALLIDOS
             failedLoginAttempts = 0;
 
-            // 3. VERIFICAR CONTROL DE DISPOSITIVOS
             const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
             const knownDeviceToken = localStorage.getItem(`vchat_known_device_token_${userProfile.id}`);
 
-            // ============================================================
-            // VALIDACIÓN DE SESIÓN ACTIVA
-            // ============================================================
             const { data: currentStatusData } = await _supabase
                 .from('users')
                 .select('status')
@@ -655,7 +652,6 @@ authForm.onsubmit = async (e) => {
                     await _supabase.auth.signOut();
                     return;
                 } else {
-                    // BLOQUEO PREVENTIVO POR SESIÓN ACTIVA (3 INTENTOS)
                     activeSessionLoginAttempts = 0;
                     
                     await _supabase.from('users').update({ status: 'offline' }).eq('id', userProfile.id);
@@ -701,9 +697,6 @@ authForm.onsubmit = async (e) => {
 
             activeSessionLoginAttempts = 0;
 
-            // ============================================================
-            // VALIDACIÓN DE NUEVO DISPOSITIVO
-            // ============================================================
             if (!knownDeviceToken) {
                 pendingDeviceUser = response.data.user;
                 pendingDeviceProfile = userProfile;
@@ -752,9 +745,6 @@ authForm.onsubmit = async (e) => {
                 if (failedLoginAttempts >= 3) {
                     failedLoginAttempts = 0;
                     
-                    // ============================================================
-                    // BLOQUEO PREVENTIVO POR 3 INTENTOS FALLIDOS DE CONTRASEÑA
-                    // ============================================================
                     if (userProfile && userProfile.id) {
                         try {
                             await _supabase.from('users').update({ status: 'offline' }).eq('id', userProfile.id);
@@ -805,7 +795,7 @@ authForm.onsubmit = async (e) => {
 };
 
 // ============================================================
-// VERIFICACIÓN DE DISPOSITIVO - CORREGIDA
+// VERIFICACIÓN DE DISPOSITIVO
 // ============================================================
 const btnVerifyDevice = document.getElementById('btn-verify-device-otp');
 if (btnVerifyDevice) {
@@ -879,7 +869,7 @@ document.getElementById('forgot-password-link').onclick = () => {
 };
 
 // ============================================================
-// RECUPERACIÓN - CORREGIDA
+// RECUPERACIÓN
 // ============================================================
 document.getElementById('btn-recovery-next').onclick = async () => {
     try {
@@ -1021,7 +1011,9 @@ messageForm.onsubmit = async (e) => {
     } else {
         messageInput.value = "";
         loadMessages();
-        await notifyUserViaTelegram(activeChatId, `💬 <b>V-Chat</b>\n\nTienes un nuevo mensaje de <b>${currentUser.name}</b>.`);
+        // NOTIFICACIÓN A TELEGRAM (SOLO INFORMA QUE HAY UN MENSAJE NUEVO SIN DETALLAR CONTENIDO)
+        const msgText = `💬 <b>Tienes un mensaje nuevo de ${escapeHTML(currentUser.name)}</b>\n\n📱 Abre V-Chat para ver tu mensaje.`;
+        await notifyUserViaTelegram(activeChatId, msgText);
     }
 };
 
@@ -1302,6 +1294,10 @@ function initChatMediaControls() {
                     
                     if (insResult.error) throw insResult.error;
                     loadMessages();
+
+                    // NOTIFICACIÓN A TELEGRAM (SIN MOSTRAR CONTENIDO)
+                    const msgText = `💬 <b>Tienes un mensaje nuevo de ${escapeHTML(currentUser.name)}</b>\n\n📱 Abre V-Chat para ver tu mensaje.`;
+                    await notifyUserViaTelegram(activeChatId, msgText);
                 } catch (err) {
                     showToast(err.message, true);
                 }
@@ -1348,6 +1344,10 @@ async function toggleVoiceRecording() {
                     
                     if (insResult.error) throw insResult.error;
                     loadMessages();
+
+                    // NOTIFICACIÓN A TELEGRAM (SIN MOSTRAR CONTENIDO)
+                    const msgText = `💬 <b>Tienes un mensaje nuevo de ${escapeHTML(currentUser.name)}</b>\n\n📱 Abre V-Chat para ver tu mensaje.`;
+                    await notifyUserViaTelegram(activeChatId, msgText);
                 } catch (err) {
                     showToast(err.message, true);
                 }
@@ -1489,19 +1489,21 @@ window.sendFriendRequestTo = async (targetUserId, targetName) => {
             
         if (insErr) throw insErr;
         
-        showToast(`Solicitud enviada a ${targetName}`);
+        showToast(`✅ Solicitud enviada a ${targetName}`);
         
         if (newContactInput) {
             newContactInput.dispatchEvent(new Event('input'));
         }
         
         const appUrl = window.location.origin + window.location.pathname;
-        const tgText = `👥 <b>Solicitud de Amistad</b>\n\n¡Has recibido una solicitud de amistad de <b>${currentUser.name}</b>!\n\n` +
-                       `👉 <a href="${appUrl}?accept_req=${insData.id}">Aceptar Solicitud</a>\n` +
-                       `👉 <a href="${appUrl}?reject_req=${insData.id}">Rechazar Solicitud</a>`;
+        const tgText = `👥 <b>Solicitud de Amistad</b>\n\n¡<b>${escapeHTML(currentUser.name)}</b> quiere ser tu amigo en V-Chat!\n\n` +
+                       `✅ <a href="${appUrl}?accept_req=${insData.id}">Aceptar Solicitud</a>\n` +
+                       `❌ <a href="${appUrl}?reject_req=${insData.id}">Rechazar Solicitud</a>\n\n` +
+                       `📱 O abre la aplicación para responder.`;
+        
         await notifyUserViaTelegram(targetUserId, tgText);
     } catch (err) {
-        showToast("No se pudo enviar la solicitud: " + err.message, true);
+        showToast("❌ No se pudo enviar la solicitud: " + err.message, true);
     }
 };
 
@@ -1563,6 +1565,19 @@ window.respondRequest = async (requestId, newStatus) => {
                 .eq('id', requestId);
             if (response.error) throw response.error;
             showToast("Solicitud de amistad aceptada");
+            
+            const { data: requestData } = await _supabase
+                .from('contacts')
+                .select('sender_id')
+                .eq('id', requestId)
+                .single();
+                
+            if (requestData && requestData.sender_id) {
+                await notifyUserViaTelegram(
+                    requestData.sender_id,
+                    `✅ <b>Solicitud de Amistad Aceptada</b>\n\n¡<b>${escapeHTML(currentUser.name)}</b> ha aceptado tu solicitud de amistad!\n\nAhora pueden chatear en V-Chat. 📱`
+                );
+            }
         }
         loadIncomingRequests();
         window.lastContactsSignature = "";
@@ -1648,8 +1663,11 @@ document.getElementById('submit-status-btn').onclick = async () => {
 
         globalContacts.forEach(async (c) => {
             const partner = c.sender_id === currentUser.id ? c.receiver : c.sender;
-            if (partner) {
-                await notifyUserViaTelegram(partner.id, `✨ <b>V-Moments</b>\n\n¡<b>${currentUser.name}</b> acaba de publicar un nuevo V-Moment!`);
+            if (partner && partner.id !== currentUser.id) {
+                await notifyUserViaTelegram(
+                    partner.id, 
+                    `✨ <b>V-Moments</b>\n\n¡<b>${escapeHTML(currentUser.name)}</b> acaba de publicar un nuevo V-Moment!\n\n📱 Abre V-Chat para verlo.`
+                );
             }
         });
 
@@ -1679,6 +1697,16 @@ async function autoPurgeStories(statuses) {
             console.error("Fallo al purgar historia:", e);
         }
     }
+}
+
+function detectMentions(text) {
+    const mentionRegex = /@([A-Za-z0-9_À-ÿ]+(?:\s+[A-Za-z0-9_À-ÿ]+)?)/g;
+    const mentions = [];
+    let match;
+    while ((match = mentionRegex.exec(text)) !== null) {
+        mentions.push(match[1]);
+    }
+    return mentions;
 }
 
 async function loadStatuses() {
@@ -1958,12 +1986,20 @@ window.toggleReaction = async (statusId, emoji, isSelected) => {
             if (response.error) throw response.error;
 
             try {
-                const { data: storyOwner } = await _supabase.from('statuses').select('user_id').eq('id', statusId).single();
+                const { data: storyOwner } = await _supabase
+                    .from('statuses')
+                    .select('user_id, user_name')
+                    .eq('id', statusId)
+                    .single();
+                    
                 if (storyOwner && storyOwner.user_id !== currentUser.id) {
-                    await notifyUserViaTelegram(storyOwner.user_id, `❤️ <b>V-Moments</b>\n\nTu historia ha recibido una nueva reacción.`);
+                    await notifyUserViaTelegram(
+                        storyOwner.user_id,
+                        `❤️ <b>Nueva reacción en tu V-Moment</b>\n\n<b>${escapeHTML(currentUser.name)}</b> reaccionó con ${emoji} a tu historia.\n\n📱 Abre V-Chat para ver todas las reacciones.`
+                    );
                 }
             } catch (tgErr) {
-                console.warn(tgErr);
+                console.warn("Error al notificar reacción:", tgErr);
             }
         }
         loadStatuses();
@@ -2037,12 +2073,44 @@ window.commentOnStatus = async (statusId, inputId) => {
         loadStatuses();
 
         try {
-            const { data: storyOwner } = await _supabase.from('statuses').select('user_id').eq('id', statusId).single();
+            const { data: storyOwner } = await _supabase
+                .from('statuses')
+                .select('user_id, user_name')
+                .eq('id', statusId)
+                .single();
+                
             if (storyOwner && storyOwner.user_id !== currentUser.id) {
-                await notifyUserViaTelegram(storyOwner.user_id, `💬 <b>V-Moments</b>\n\nTu historia ha recibido un nuevo comentario.`);
+                const commentText = text.length > 80 ? text.substring(0, 80) + '...' : text;
+                await notifyUserViaTelegram(
+                    storyOwner.user_id,
+                    `💬 <b>Nuevo comentario en tu V-Moment</b>\n\n<b>${escapeHTML(currentUser.name)}</b> comentó:\n"${escapeHTML(commentText)}"\n\n📱 Abre V-Chat para responder.`
+                );
             }
+            
+            const mentionedUsers = detectMentions(text);
+            if (mentionedUsers.length > 0) {
+                for (const username of mentionedUsers) {
+                    try {
+                        const { data: mentionedUser } = await _supabase
+                            .from('users')
+                            .select('id, name')
+                            .eq('username', username.toLowerCase())
+                            .single();
+                            
+                        if (mentionedUser && mentionedUser.id !== currentUser.id && mentionedUser.id !== storyOwner?.user_id) {
+                            await notifyUserViaTelegram(
+                                mentionedUser.id,
+                                `📣 <b>Te mencionaron en un comentario</b>\n\n<b>${escapeHTML(currentUser.name)}</b> te mencionó en un comentario de un V-Moment.\n\n📱 Abre V-Chat para verlo.`
+                            );
+                        }
+                    } catch (mentionErr) {
+                        console.warn("Error al notificar mención:", mentionErr);
+                    }
+                }
+            }
+            
         } catch (tgErr) {
-            console.warn(tgErr);
+            console.warn("Error al notificar comentario:", tgErr);
         }
 
     } catch (err) { showToast(err.message, true); }
@@ -2436,22 +2504,58 @@ async function handleUrlActions() {
     const urlParams = new URLSearchParams(window.location.search);
     const acceptId = urlParams.get('accept_req');
     const rejectId = urlParams.get('reject_req');
+    
     if (acceptId) {
-        const { error } = await _supabase.from('contacts').update({ status: 'accepted' }).eq('id', acceptId);
-        if (!error) {
-            showToast("Solicitud de amistad aceptada");
+        const { data: requestData, error: fetchError } = await _supabase
+            .from('contacts')
+            .select('*')
+            .eq('id', acceptId)
+            .single();
+            
+        if (fetchError) {
+            showToast("Error al procesar la solicitud. Intenta desde la app.", true);
             window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+        }
+        
+        if (requestData) {
+            const { error } = await _supabase
+                .from('contacts')
+                .update({ status: 'accepted' })
+                .eq('id', acceptId);
+                
+            if (!error) {
+                showToast("✅ Solicitud de amistad aceptada con éxito");
+                if (requestData.sender_id) {
+                    await notifyUserViaTelegram(
+                        requestData.sender_id,
+                        `✅ <b>Solicitud de Amistad Aceptada</b>\n\n¡<b>${currentUser ? escapeHTML(currentUser.name) : 'Un usuario'}</b> ha aceptado tu solicitud de amistad!\n\nAhora pueden chatear en V-Chat. 📱`
+                    );
+                }
+                window.lastContactsSignature = "";
+                loadContacts();
+                loadIncomingRequests();
+            } else {
+                showToast("Error al aceptar la solicitud", true);
+            }
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } 
+    else if (rejectId) {
+        const { error } = await _supabase
+            .from('contacts')
+            .delete()
+            .eq('id', rejectId);
+            
+        if (!error) {
+            showToast("Solicitud de amistad rechazada");
             window.lastContactsSignature = "";
             loadContacts();
+            loadIncomingRequests();
+        } else {
+            showToast("Error al rechazar la solicitud", true);
         }
-    } else if (rejectId) {
-        const { error } = await _supabase.from('contacts').delete().eq('id', rejectId);
-        if (!error) {
-            showToast("Solicitud de amistad de rechazada");
-            window.history.replaceState({}, document.title, window.location.pathname);
-            window.lastContactsSignature = "";
-            loadContacts();
-        }
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
@@ -2467,9 +2571,6 @@ async function showApp(user) {
             return;
         }
         
-        // ============================================================
-        // VERIFICACIÓN ESTRICTA DE SESIÓN ACTIVA
-        // ============================================================
         const localDeviceId = localStorage.getItem(`vchat_device_id_${user.id}`);
         
         const { data: statusData } = await _supabase
@@ -2961,19 +3062,17 @@ setInterval(() => {
 }, 5000);
 
 // =======================================================
-// 12. CONTROL SEGURO DE PUBLICIDAD (CORREGIDO)
+// 12. CONTROL SEGURO DE PUBLICIDAD
 // =======================================================
 function loadSafeAd() {
     const container = document.getElementById('adsterra-banner-container');
     if (!container) return;
     
-    // Si es usuario premium, ocultar publicidad
     if (currentUser && currentUser.is_premium) {
         container.style.display = 'none';
         return;
     }
     
-    // Limpiar contenedor
     container.innerHTML = '';
     container.style.display = 'flex';
     container.style.justifyContent = 'center';
@@ -2988,7 +3087,6 @@ function loadSafeAd() {
     container.style.borderRadius = '16px';
     container.style.border = '1px solid var(--border-light)';
     
-    // Crear un contenedor interno para el iframe con dimensiones fijas
     const iframeWrapper = document.createElement('div');
     iframeWrapper.style.width = '100%';
     iframeWrapper.style.maxWidth = '320px';
@@ -3009,15 +3107,12 @@ function loadSafeAd() {
     iframe.scrolling = 'no';
     iframe.allow = '';
 
-    // CONFIGURACIÓN DE SANDBOX MUY RESTRICTIVA
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.sandbox.add('allow-scripts');
     iframe.sandbox.add('allow-same-origin');
     
-    // Asegurar que no se pueda redirigir la página padre
     iframe.setAttribute('allow', '');
     
-    // Cargar el anuncio con un script controlado
     const adHtml = `
         <!DOCTYPE html>
         <html style="margin:0; padding:0; overflow:hidden; width:100%; height:100%;">
@@ -3045,7 +3140,6 @@ function loadSafeAd() {
                     justify-content:center;
                     align-items:center;
                 }
-                /* Limitar cualquier elemento que se desborde */
                 #ad-container * {
                     max-width:320px !important;
                     max-height:50px !important;
@@ -3056,16 +3150,13 @@ function loadSafeAd() {
         <body>
             <div id="ad-container">
                 <script type="text/javascript">
-                    // Prevenir cualquier redirección o popup
                     window.open = function() { return null; };
                     window.alert = function() { return null; };
                     window.confirm = function() { return false; };
                     window.prompt = function() { return null; };
                     
-                    // Prevenir que el anuncio intente redirigir
                     window.top.location.href = window.location.href;
                     
-                    // Configuración del anuncio
                     atOptions = {
                         'key' : 'ce71424fc983cc29c763e0e5e6d63157',
                         'format' : 'iframe',
@@ -3077,7 +3168,6 @@ function loadSafeAd() {
                 <script type="text/javascript" src="https://www.highperformanceformat.com/ce71424fc983cc29c763e0e5e6d63157/invoke.js"><\/script>
             </div>
             <script>
-                // Control adicional: después de 5 segundos, verificar que el anuncio no haya creado elementos fuera del contenedor
                 setTimeout(function() {
                     var container = document.getElementById('ad-container');
                     if (container) {
@@ -3094,13 +3184,11 @@ function loadSafeAd() {
         </html>
     `;
     
-    // Usar srcdoc para cargar el contenido
     iframe.srcdoc = adHtml;
     
     iframeWrapper.appendChild(iframe);
     container.appendChild(iframeWrapper);
     
-    // Añadir mensaje informativo de que el anuncio es necesario
     const adNotice = document.createElement('div');
     adNotice.style.cssText = `
         position: absolute;
