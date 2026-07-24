@@ -1,7 +1,7 @@
 // =======================================================
 // SERVICE WORKER CON AUTO-LIMPIEZA DE CACHÉ
 // =======================================================
-const CACHE_NAME = 'vchat-cache-v1.2.0'; // <--- CAMBIA ESTE NÚMERO EN CADA ACTUALIZACIÓN
+const CACHE_NAME = 'vchat-cache-v1.0.0'; // <--- CAMBIA ESTE NÚMERO EN CADA ACTUALIZACIÓN
 
 // Archivos principales a guardar en memoria
 const ASSETS_TO_CACHE = [
