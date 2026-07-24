@@ -20,7 +20,7 @@ let recordTimer = null;
 let selectedLocalSongFile = null;
 
 let failedLoginAttempts = 0;
-let activeSessionLoginAttempts = 0; // Control de intentos de inicio sobre sesión activa
+let activeSessionLoginAttempts = 0;
 
 let generatedRecoveryCode = null;
 let currentUserRecovery = null;
@@ -35,7 +35,6 @@ let searchDebounceTimer = null;
 
 let activeTargetUserObj = null;
 
-// Función auxiliar para escapar caracteres HTML y prevenir ataques XSS
 function escapeHTML(str) {
     if (!str) return '';
     return str
@@ -162,7 +161,7 @@ function decryptMessage(encryptedText, id1, id2) {
 }
 
 // =======================================================
-// 2. BOTONES DE NAVEGACIÓN Y PANELES (ÁMBITO INTERNO APP)
+// 2. BOTONES DE NAVEGACIÓN Y PANELES
 // =======================================================
 function initNavigation() {
     document.getElementById('status-btn').onclick = () => window.showFeedView();
@@ -243,7 +242,6 @@ function initNavigation() {
         location.reload();
     };
 
-    // APERTURA DEL MODAL DE INFORMACIÓN Y PRIVACIDAD AL TOCAR LA CABECERA DEL CHAT
     const chatHeaderTrigger = document.getElementById('chat-target-info-trigger');
     if (chatHeaderTrigger) {
         chatHeaderTrigger.onclick = () => {
@@ -259,7 +257,6 @@ function initNavigation() {
         };
     }
 
-    // MANEJADOR DEL INTERRUPTOR SWITCH DE PRIVACIDAD
     const privateSwitch = document.getElementById('toggle-private-switch');
     if (privateSwitch) {
         privateSwitch.onchange = (e) => {
@@ -277,7 +274,6 @@ function initNavigation() {
     }
 }
 
-// ABRIR Y POBLAR MODAL DE DETALLES DEL CONTACTO
 window.openContactInfoModal = (contact) => {
     const modal = document.getElementById('contact-info-modal');
     if (!modal) return;
@@ -295,7 +291,6 @@ window.openContactInfoModal = (contact) => {
     nameLabel.innerText = contact.name;
     usernameLabel.innerText = `@${contact.username || 'usuario'} • ${contact.vchat_id || ''}`;
 
-    // Verificar si el contacto ya está marcado como privado
     const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
     const privateList = JSON.parse(privateListStr);
     const isPrivate = privateList.includes(contact.id);
@@ -409,7 +404,7 @@ window.openEmojiPicker = (targetId, isReaction = false) => {
 };
 
 // =======================================================
-// 4. AUTENTICACIÓN Y SEGURIDAD (CON CONTROL DE BLOQUEO PREVENTIVO)
+// 4. AUTENTICACIÓN Y SEGURIDAD
 // =======================================================
 const authForm = document.getElementById('auth-form');
 const toggleLink = document.getElementById('toggle-link');
@@ -566,12 +561,15 @@ if (searchInput) {
     };
 }
 
+// ============================================================
+// AUTH FORM - CORREGIDO CON BLOQUEO PREVENTIVO
+// ============================================================
 authForm.onsubmit = async (e) => {
     e.preventDefault();
     requestNotificationPermission();
     let iden = document.getElementById('login-identifier').value.trim().toLowerCase();
     const pass = document.getElementById('reg-password').value;
-    let userProfile = null; // Declaración de alcance de variable raíz para usar en el bloque catch
+    let userProfile = null;
 
     try {
         if (isRegistering) {
@@ -593,6 +591,7 @@ authForm.onsubmit = async (e) => {
             if (dbResult.error) throw dbResult.error;
             alert("¡Registro exitoso!"); location.reload();
         } else {
+            // NORMALIZAR IDENTIFICADOR
             if (iden.startsWith('id-')) {
                 const { data: userData, error: userErr = null } = await _supabase
                     .from('users')
@@ -604,7 +603,7 @@ authForm.onsubmit = async (e) => {
                 }
             }
 
-            // 1. Obtener el perfil del usuario para validar su existencia
+            // 1. OBTENER PERFIL DEL USUARIO
             const { data: fetchedProfile, error: profileErr } = await _supabase
                 .from('users')
                 .select('*')
@@ -615,39 +614,59 @@ authForm.onsubmit = async (e) => {
                 showToast("Usuario o contraseña incorrectos. Por favor, verifica tus datos.", true);
                 return;
             }
-            userProfile = fetchedProfile; // Asignación de variable de alcance raíz
+            userProfile = fetchedProfile;
 
-            // 2. Intentar autenticar con Supabase Auth primero (valida la contraseña)
+            // 2. INTENTAR AUTENTICAR CON SUPABASE
             const email = `${iden}@vchat.app`;
             const response = await _supabase.auth.signInWithPassword({ email, password: pass });
             if (response.error) throw response.error;
 
-            // Al autenticar exitosamente, se resetea el contador de intentos de contraseña incorrectos
+            // RESETEAR CONTADOR DE INTENTOS FALLIDOS
             failedLoginAttempts = 0;
 
-            // 3. Una vez validada la contraseña, se verifica el control de dispositivos
+            // 3. VERIFICAR CONTROL DE DISPOSITIVOS
             const storedDeviceId = localStorage.getItem(`vchat_device_id_${userProfile.id}`);
             const knownDeviceToken = localStorage.getItem(`vchat_known_device_token_${userProfile.id}`);
 
-            // Validación de sesión activa en otro dispositivo
-            if (userProfile.status === 'online' && !storedDeviceId) {
+            // ============================================================
+            // VALIDACIÓN DE SESIÓN ACTIVA
+            // ============================================================
+            const { data: currentStatusData } = await _supabase
+                .from('users')
+                .select('status')
+                .eq('id', userProfile.id)
+                .single();
+                
+            const isUserOnline = currentStatusData && currentStatusData.status === 'online';
+
+            if (isUserOnline && !storedDeviceId) {
                 activeSessionLoginAttempts++;
 
                 if (activeSessionLoginAttempts < 3) {
-                    showToast("Tienes una sesión activa en otro dispositivo. Te invitamos a cerrar la sesión en el equipo donde la tengas abierta para ingresar aquí.", true);
-                    if (userProfile.telegram_chat_id) {
-                        await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde otro equipo mientras mantienes tu sesión abierta.`);
+                    showToast("Tienes una sesión activa en otro dispositivo. Por favor, cierra la sesión en el otro equipo para ingresar aquí.", true);
+                    
+                    if (userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
+                        await sendTelegramMessage(
+                            userProfile.telegram_chat_id,
+                            `⚠️ <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde otro equipo mientras mantienes tu sesión abierta.\n\n<b>Intento:</b> ${activeSessionLoginAttempts}/3.\n\nSi no reconoces este acceso, cambia tu contraseña inmediatamente.`
+                        );
                     }
+                    
                     await _supabase.auth.signOut();
                     return;
                 } else {
-                    // BLOQUEO PREVENTIVO: Se han completado 3 intentos con sesión activa abierta
+                    // BLOQUEO PREVENTIVO POR SESIÓN ACTIVA (3 INTENTOS)
                     activeSessionLoginAttempts = 0;
                     
-                    // Forzar cierre de sesión en base de datos
                     await _supabase.from('users').update({ status: 'offline' }).eq('id', userProfile.id);
+                    
+                    if (userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
+                        await sendTelegramMessage(
+                            userProfile.telegram_chat_id,
+                            `🚨 <b>BLOQUEO PREVENTIVO V-Chat</b>\n\nTu cuenta ha sido bloqueada preventivamente debido a 3 intentos de acceso desde otro dispositivo mientras tu sesión estaba activa.\n\nPara desbloquear, deberás verificar tu identidad mediante el código OTP o tu pregunta secreta.`
+                        );
+                    }
 
-                    // Forzar flujo de verificación de identidad de dispositivo
                     pendingDeviceUser = response.data.user;
                     pendingDeviceProfile = userProfile;
                     
@@ -659,7 +678,11 @@ authForm.onsubmit = async (e) => {
                         document.getElementById('device-otp-code').value = '';
                         
                         showToast("Bloqueo preventivo: Sesión anterior cerrada. Verificando por Telegram...", true);
-                        await sendTelegramMessage(userProfile.telegram_chat_id, `🚨 <b>Bloqueo Preventivo V-Chat</b>\n\nSe ha forzado el cierre de tu sesión activa debido a múltiples intentos de acceso.\n\nCódigo de autorización para este dispositivo: <b>${pendingDeviceOtp}</b>`);
+                        
+                        await sendTelegramMessage(
+                            userProfile.telegram_chat_id,
+                            `🔐 <b>VERIFICACIÓN DE SEGURIDAD V-Chat</b>\n\nSe ha detectado actividad sospechosa en tu cuenta.\n\nPara desbloquear tu cuenta, ingresa el siguiente código en la aplicación:\n\n<b>Código de verificación: ${pendingDeviceOtp}</b>\n\nEste código expira en 10 minutos. No lo compartas con nadie.`
+                        );
                         
                         document.getElementById('device-auth-modal').classList.remove('hidden');
                         return;
@@ -669,16 +692,18 @@ authForm.onsubmit = async (e) => {
                         document.getElementById('device-question-label').innerText = userProfile.secret_question || "¿Cuál es tu pregunta secreta?";
                         document.getElementById('device-answer-input').value = '';
                         
-                        showToast("Bloqueo preventivo: Sesión anterior cerrada. Responde la pregunta de seguridad.", true);
+                        showToast("Bloqueo preventivo: Responde la pregunta de seguridad para desbloquear.", true);
                         document.getElementById('device-auth-modal').classList.remove('hidden');
                         return;
                     }
                 }
             }
 
-            // Si pasa la validación de sesión activa se restablece el contador de intentos por duplicidad
             activeSessionLoginAttempts = 0;
 
+            // ============================================================
+            // VALIDACIÓN DE NUEVO DISPOSITIVO
+            // ============================================================
             if (!knownDeviceToken) {
                 pendingDeviceUser = response.data.user;
                 pendingDeviceProfile = userProfile;
@@ -690,19 +715,22 @@ authForm.onsubmit = async (e) => {
                     document.getElementById('device-question-view').classList.add('hidden');
                     document.getElementById('device-otp-code').value = '';
                     
-                    showToast("Verificando dispositivo con Telegram...");
-                    await sendTelegramMessage(userProfile.telegram_chat_id, `🚨 <b>Alerta de Seguridad V-Chat</b>\n\nSe detectó un intento de inicio de sesión desde un <b>NUEVO DISPOSITIVO</b>.\n\n¿Reconoces este acceso?\n\nTu código de autorización es: <b>${pendingDeviceOtp}</b>\n\nIngresa este código de 6 dígitos en V-Chat para dar permiso e ingresar.`);
+                    showToast("Nuevo dispositivo detectado. Verificando por Telegram...");
+                    
+                    await sendTelegramMessage(
+                        userProfile.telegram_chat_id,
+                        `📱 <b>NUEVO DISPOSITIVO DETECTADO</b>\n\nHemos detectado un intento de inicio de sesión desde un nuevo dispositivo.\n\n<b>Código de verificación:</b> ${pendingDeviceOtp}\n\nIngresa este código en V-Chat para autorizar este dispositivo.\n\nSi no reconoces este acceso, ignora este mensaje.`
+                    );
                     
                     document.getElementById('device-auth-modal').classList.remove('hidden');
                     return;
-                } 
-                else {
+                } else {
                     document.getElementById('device-otp-view').classList.add('hidden');
                     document.getElementById('device-question-view').classList.remove('hidden');
                     document.getElementById('device-question-label').innerText = userProfile.secret_question || "¿Cuál es tu pregunta secreta?";
                     document.getElementById('device-answer-input').value = '';
                     
-                    showToast("Autorizando nuevo dispositivo mediante Pregunta Secreta...");
+                    showToast("Nuevo dispositivo detectado. Responde la pregunta de seguridad para autorizar.");
                     document.getElementById('device-auth-modal').classList.remove('hidden');
                     return;
                 }
@@ -711,7 +739,7 @@ authForm.onsubmit = async (e) => {
                 showApp(response.data.user);
             }
         }
-    } catch (err) { 
+    } catch (err) {
         let errMsg = err && err.message ? err.message : String(err || '');
         let friendlyMsg = errMsg;
 
@@ -720,44 +748,65 @@ authForm.onsubmit = async (e) => {
             
             if (!isRegistering) {
                 failedLoginAttempts++;
+                
                 if (failedLoginAttempts >= 3) {
                     failedLoginAttempts = 0;
                     
-                    // Bloqueo preventivo en base de datos al fallar contraseña
+                    // ============================================================
+                    // BLOQUEO PREVENTIVO POR 3 INTENTOS FALLIDOS DE CONTRASEÑA
+                    // ============================================================
                     if (userProfile && userProfile.id) {
                         try {
                             await _supabase.from('users').update({ status: 'offline' }).eq('id', userProfile.id);
                         } catch (e) {
-                            console.warn("Fallo al actualizar estado offline en bloqueo preventivo de clave:", e);
+                            console.warn("Fallo al actualizar estado offline en bloqueo preventivo:", e);
                         }
 
-                        // Enviar alerta preventiva al bot de Telegram del usuario si está registrado
                         if (userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
                             try {
-                                await sendTelegramMessage(userProfile.telegram_chat_id, `⚠️ <b>Bloqueo Preventivo V-Chat</b>\n\nTu cuenta ha sido bloqueada preventivamente debido a 3 intentos fallidos de inicio de sesión para evitar accesos sospechosos.\n\nPor favor, verifica tu identidad mediante el método de recuperación en la aplicación.`);
+                                await sendTelegramMessage(
+                                    userProfile.telegram_chat_id,
+                                    `🚨 <b>BLOQUEO PREVENTIVO V-Chat</b>\n\nTu cuenta ha sido bloqueada preventivamente debido a 3 intentos fallidos de inicio de sesión.\n\n<b>Medida de seguridad:</b> Se ha forzado el cierre de cualquier sesión activa.\n\nPara desbloquear, utiliza el método de recuperación o verificación de seguridad.`
+                                );
                             } catch (tgErr) {
                                 console.warn("Fallo al enviar alerta preventiva a Telegram:", tgErr);
                             }
                         }
-                    }
 
-                    showToast("Bloqueo preventivo: Intentos fallidos excedidos. Redirigiendo a recuperación...", true);
-                    setTimeout(() => {
-                        const recId = document.getElementById('recovery-identifier');
-                        if (recId) recId.value = iden;
-                        const recModal = document.getElementById('recovery-modal');
-                        if (recModal) recModal.classList.remove('hidden');
-                        const nextBtn = document.getElementById('btn-recovery-next');
-                        if (nextBtn) nextBtn.click();
-                    }, 2000);
+                        showToast("Bloqueo preventivo: Intentos fallidos excedidos. Redirigiendo a recuperación...", true);
+                        
+                        setTimeout(async () => {
+                            const recId = document.getElementById('recovery-identifier');
+                            if (recId) recId.value = iden;
+                            
+                            const recModal = document.getElementById('recovery-modal');
+                            if (recModal) recModal.classList.remove('hidden');
+                            
+                            const nextBtn = document.getElementById('btn-recovery-next');
+                            if (nextBtn) {
+                                setTimeout(() => {
+                                    nextBtn.click();
+                                    if (userProfile && userProfile.telegram_chat_id && userProfile.telegram_chat_id.trim() !== '') {
+                                        setTimeout(() => {
+                                            const tgBtn = document.getElementById('btn-method-telegram');
+                                            if (tgBtn) tgBtn.click();
+                                        }, 500);
+                                    }
+                                }, 1500);
+                            }
+                        }, 1500);
+                    }
                     return;
                 }
             }
         }
-        showToast(friendlyMsg, true); 
+        showToast(friendlyMsg, true);
     }
 };
 
+// ============================================================
+// VERIFICACIÓN DE DISPOSITIVO - CORREGIDA
+// ============================================================
 const btnVerifyDevice = document.getElementById('btn-verify-device-otp');
 if (btnVerifyDevice) {
     btnVerifyDevice.onclick = async () => {
@@ -767,19 +816,23 @@ if (btnVerifyDevice) {
         if (!otpView.classList.contains('hidden')) {
             const enteredOtp = document.getElementById('device-otp-code').value.trim();
             if (enteredOtp === String(pendingDeviceOtp)) {
-                showToast("Dispositivo autorizado con éxito");
+                showToast("✅ Dispositivo autorizado con éxito");
                 document.getElementById('device-auth-modal').classList.add('hidden');
                 
                 if (pendingDeviceUser) {
                     localStorage.setItem(`vchat_known_device_token_${pendingDeviceUser.id}`, 'known_' + Date.now());
+                    localStorage.setItem(`vchat_device_id_${pendingDeviceUser.id}`, 'device_' + Date.now() + '_' + Math.floor(Math.random() * 100000));
                     const userToLogIn = pendingDeviceUser;
                     pendingDeviceUser = null;
                     pendingDeviceProfile = null;
                     pendingDeviceOtp = null;
+                    
+                    await _supabase.from('users').update({ status: 'online' }).eq('id', userToLogIn.id);
+                    
                     await showApp(userToLogIn);
                 }
             } else {
-                showToast("Código de autorización de Telegram incorrecto.", true);
+                showToast("❌ Código de autorización incorrecto. Verifica el mensaje de Telegram.", true);
             }
         } 
         else if (!questionView.classList.contains('hidden')) {
@@ -787,19 +840,23 @@ if (btnVerifyDevice) {
             const realAns = (pendingDeviceProfile && pendingDeviceProfile.secret_answer) ? pendingDeviceProfile.secret_answer.trim().toLowerCase() : '';
             
             if (enteredAns && enteredAns === realAns) {
-                showToast("Respuesta correcta. Dispositivo autorizado.");
+                showToast("✅ Respuesta correcta. Dispositivo autorizado.");
                 document.getElementById('device-auth-modal').classList.add('hidden');
                 
                 if (pendingDeviceUser) {
                     localStorage.setItem(`vchat_known_device_token_${pendingDeviceUser.id}`, 'known_' + Date.now());
+                    localStorage.setItem(`vchat_device_id_${pendingDeviceUser.id}`, 'device_' + Date.now() + '_' + Math.floor(Math.random() * 100000));
                     const userToLogIn = pendingDeviceUser;
                     pendingDeviceUser = null;
                     pendingDeviceProfile = null;
                     pendingDeviceOtp = null;
+                    
+                    await _supabase.from('users').update({ status: 'online' }).eq('id', userToLogIn.id);
+                    
                     await showApp(userToLogIn);
                 }
             } else {
-                showToast("Respuesta secreta incorrecta. No se puede autorizar este dispositivo.", true);
+                showToast("❌ Respuesta secreta incorrecta. No se puede autorizar este dispositivo.", true);
             }
         }
     };
@@ -821,6 +878,9 @@ document.getElementById('forgot-password-link').onclick = () => {
     document.getElementById('recovery-modal').classList.remove('hidden');
 };
 
+// ============================================================
+// RECUPERACIÓN - CORREGIDA
+// ============================================================
 document.getElementById('btn-recovery-next').onclick = async () => {
     try {
         const iden = document.getElementById('recovery-identifier').value.trim();
@@ -840,10 +900,20 @@ document.getElementById('btn-recovery-next').onclick = async () => {
             return;
         }
         
-        currentUserRecovery = response.data; 
+        currentUserRecovery = response.data;
         
         document.getElementById('recovery-step-1').classList.add('hidden');
         document.getElementById('recovery-method-select').classList.remove('hidden');
+        
+        if (currentUserRecovery.telegram_chat_id && currentUserRecovery.telegram_chat_id.trim() !== '') {
+            const tgBtn = document.getElementById('btn-method-telegram');
+            if (tgBtn) {
+                tgBtn.style.border = '2px solid var(--vchat-green)';
+                tgBtn.style.boxShadow = '0 0 15px rgba(0, 191, 165, 0.3)';
+            }
+            showToast("🔐 Verifica tu identidad. Tienes Telegram vinculado.");
+        }
+        
     } catch (err) {
         showToast(`Error de recuperación: ${err.message || err}`, true);
     }
@@ -866,8 +936,17 @@ document.getElementById('btn-method-telegram').onclick = async () => {
     document.getElementById('recovery-method-select').classList.add('hidden');
     document.getElementById('recovery-step-2b').classList.remove('hidden');
     
-    showToast("Enviando código de seguridad...");
-    await sendTelegramMessage(currentUserRecovery.telegram_chat_id, `🔑 <b>Código de Recuperación V-Chat</b>\n\nTu código temporal de verificación es: <b>${generatedRecoveryCode}</b>\n\nNo reveles este código de seguridad a nadie.`);
+    showToast("📨 Enviando código de seguridad a Telegram...");
+    
+    try {
+        await sendTelegramMessage(
+            currentUserRecovery.telegram_chat_id,
+            `🔑 <b>CÓDIGO DE RECUPERACIÓN V-Chat</b>\n\nTu código temporal de verificación es:\n\n<b>${generatedRecoveryCode}</b>\n\n⚠️ <b>IMPORTANTE:</b> Este código es personal e intransferible. No lo compartas con nadie.\n\nEste código expira en 10 minutos.`
+        );
+        showToast("✅ Código enviado. Revisa tu Telegram.");
+    } catch (err) {
+        showToast("❌ Error al enviar el código. Verifica tu ID de Telegram.", true);
+    }
 };
 
 document.getElementById('btn-recovery-verify').onclick = () => {
@@ -1304,7 +1383,7 @@ async function toggleVoiceRecording() {
 }
 
 // =======================================================
-// 6. BÚSQUEDA PÚBLICA SOCIAL Y SOLICITUDES DE AMISTAD EN TIEMPO REAL
+// 6. BÚSQUEDA PÚBLICA SOCIAL Y SOLICITUDES DE AMISTAD
 // =======================================================
 const newContactInput = document.getElementById('new-contact-id');
 if (newContactInput) {
@@ -1684,7 +1763,6 @@ async function loadStatuses() {
             const hasHeart = c.text.endsWith(" ❤️");
             const cleanText = hasHeart ? c.text.substring(0, c.text.length - 2) : c.text;
 
-            // Escapamos los comentarios para evitar inyección HTML / XSS
             const safeCommentName = escapeHTML(c.user_name);
             const safeCommentText = escapeHTML(cleanText);
             const formattedText = safeCommentText.replace(/@([A-Za-z0-9_À-ÿ]+(?:\s+[A-Za-z0-9_À-ÿ]+)?)/g, '<span class="mention-tag">@$1</span>');
@@ -2208,7 +2286,6 @@ if (testTgBtn) {
     };
 }
 
-// INTEGRACIÓN: Alternar privacidad (Ocultar/Desocultar Contactos con Hash SHA-256 para VIP)
 window.toggleContactPrivacy = (contactId, name) => {
     if (!currentUser.is_premium) {
         showToast("Esta es una función exclusiva de V-Chat Premium VIP.", true);
@@ -2246,7 +2323,6 @@ window.toggleContactPrivacy = (contactId, name) => {
     loadPrivateContactsList();
 };
 
-// Generar lista de contactos privados ocultos en el panel secreto de seguridad
 function loadPrivateContactsList() {
     const listContainer = document.getElementById('private-contacts-list');
     if (!listContainer || !currentUser) return;
@@ -2380,7 +2456,7 @@ async function handleUrlActions() {
 }
 
 // =======================================================
-// 11. INICIALIZACIÓN DE LA APP Y BLOQUEO DE SESIÓN DUPLICADA
+// 11. INICIALIZACIÓN DE LA APP
 // =======================================================
 async function showApp(user) {
     try {
@@ -2391,17 +2467,37 @@ async function showApp(user) {
             return;
         }
         
-        let localDeviceId = localStorage.getItem(`vchat_device_id_${user.id}`);
+        // ============================================================
+        // VERIFICACIÓN ESTRICTA DE SESIÓN ACTIVA
+        // ============================================================
+        const localDeviceId = localStorage.getItem(`vchat_device_id_${user.id}`);
         
-        if (profile.status === 'online' && !localDeviceId) {
-            showToast("Tienes una sesión activa en otro dispositivo. Te invitamos a cerrar la sesión en el equipo donde la tengas abierta para ingresar aquí.", true);
+        const { data: statusData } = await _supabase
+            .from('users')
+            .select('status')
+            .eq('id', user.id)
+            .single();
+            
+        const isOnline = statusData && statusData.status === 'online';
+        
+        if (isOnline && !localDeviceId) {
+            showToast("❌ Tienes una sesión activa en otro dispositivo. Cierra la sesión en el otro equipo para ingresar aquí.", true);
+            
+            if (profile.telegram_chat_id && profile.telegram_chat_id.trim() !== '') {
+                await sendTelegramMessage(
+                    profile.telegram_chat_id,
+                    `⚠️ <b>ALERTA DE SEGURIDAD V-Chat</b>\n\nSe ha intentado iniciar sesión en tu cuenta desde otro dispositivo mientras tenías una sesión activa.\n\n<b>Acción recomendada:</b> Si no reconoces este acceso, cambia tu contraseña inmediatamente.`
+                );
+            }
+            
             await _supabase.auth.signOut();
             return;
         }
         
-        if (!localDeviceId) {
-            localDeviceId = 'device_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-            localStorage.setItem(`vchat_device_id_${user.id}`, localDeviceId);
+        let deviceId = localDeviceId;
+        if (!deviceId) {
+            deviceId = 'device_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+            localStorage.setItem(`vchat_device_id_${user.id}`, deviceId);
         }
         
         currentUser = profile;
@@ -2413,7 +2509,7 @@ async function showApp(user) {
         try {
             await _supabase.from('users').update({ status: 'online' }).eq('id', user.id);
         } catch (statusErr) {
-            console.warn(statusErr);
+            console.warn("Error al actualizar estado online:", statusErr);
         }
         
         document.getElementById('my-avatar').src = profile.avatar_url;
@@ -2450,7 +2546,6 @@ async function showApp(user) {
         
         window.showFeedView();
 
-        // Lanzar de forma asíncrona no bloqueante para mitigar retrasos de red lenta
         setTimeout(() => {
             const presenceChannel = _supabase.channel('presence-vchat', {
                 config: { presence: { key: currentUser.id } }
@@ -2644,7 +2739,6 @@ async function loadContacts() {
             item.style.transition = 'all 0.2s';
             item.innerHTML = itemHtml;
 
-            // ABRE EL CHAT CON UN CLIC
             item.onclick = (e) => {
                 e.stopPropagation();
                 window.startChat(contact.id, contact.name, avatarSrc, contact);
@@ -2887,7 +2981,6 @@ function loadSafeAd() {
     iframe.style.overflow = 'hidden';
     iframe.scrolling = 'no';
     
-    // Configuración estricta de sandbox para mitigar redireccionamientos no autorizados
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     
     container.appendChild(iframe);
