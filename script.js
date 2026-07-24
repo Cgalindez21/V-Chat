@@ -1476,7 +1476,7 @@ window.respondRequest = async (requestId, newStatus) => {
                 .delete()
                 .eq('id', requestId);
             if (response.error) throw response.error;
-            showToast("Solicitud de amistad rechazada");
+            showToast("Solicitud de amistad de rechazada");
         } else {
             const response = await _supabase
                 .from('contacts')
@@ -2351,7 +2351,7 @@ window.showChatView = () => {
     
     document.getElementById('chat-navbar').classList.remove('hidden');
     document.getElementById('messagesContainer').classList.remove('hidden');
-    document.getElementById('chat-footer').classList.add('hidden');
+    document.getElementById('chat-footer').classList.remove('hidden');
     
     document.getElementById('mainWindow').className = 'main-window view-chat';
 };
@@ -2450,44 +2450,47 @@ async function showApp(user) {
         
         window.showFeedView();
 
-        const presenceChannel = _supabase.channel('presence-vchat', {
-            config: { presence: { key: currentUser.id } }
-        });
-        
-        window.onlineUsersList = [];
-        
-        presenceChannel
-            .on('presence', { event: 'sync' }, () => {
-                const state = presenceChannel.presenceState();
-                window.onlineUsersList = Object.keys(state);
-                window.lastContactsSignature = ""; 
-                loadContacts();
-            })
-            .subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    try {
-                        await presenceChannel.track({ online_at: new Date().toISOString() });
-                    } catch (trackErr) {
-                        console.warn(trackErr);
-                    }
-                }
+        // Lanzar de forma asíncrona no bloqueante para mitigar retrasos de red lenta
+        setTimeout(() => {
+            const presenceChannel = _supabase.channel('presence-vchat', {
+                config: { presence: { key: currentUser.id } }
             });
+            
+            window.onlineUsersList = [];
+            
+            presenceChannel
+                .on('presence', { event: 'sync' }, () => {
+                    const state = presenceChannel.presenceState();
+                    window.onlineUsersList = Object.keys(state);
+                    window.lastContactsSignature = ""; 
+                    loadContacts();
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        try {
+                            await presenceChannel.track({ online_at: new Date().toISOString() });
+                        } catch (trackErr) {
+                            console.warn(trackErr);
+                        }
+                    }
+                });
 
-        _supabase.channel(`realtime-my-profile-${currentUser.id}`)
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${currentUser.id}` }, (payload) => {
-                currentUser = payload.new;
-                updatePremiumUI();
-                window.lastContactsSignature = "";
-                loadContacts();
-                loadStatuses();
-            })
-            .subscribe();
+            _supabase.channel(`realtime-my-profile-${currentUser.id}`)
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${currentUser.id}` }, (payload) => {
+                    currentUser = payload.new;
+                    updatePremiumUI();
+                    window.lastContactsSignature = "";
+                    loadContacts();
+                    loadStatuses();
+                })
+                .subscribe();
 
-        _supabase.channel('realtime-statuses-feed')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'statuses' }, () => { loadStatuses(); })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'status_comments' }, () => { loadStatuses(); })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'status_reactions' }, () => { loadStatuses(); })
-            .subscribe();
+            _supabase.channel('realtime-statuses-feed')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'statuses' }, () => { loadStatuses(); })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'status_comments' }, () => { loadStatuses(); })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'status_reactions' }, () => { loadStatuses(); })
+                .subscribe();
+        }, 100);
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -2884,7 +2887,8 @@ function loadSafeAd() {
     iframe.style.overflow = 'hidden';
     iframe.scrolling = 'no';
     
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+    // Configuración estricta de sandbox para mitigar redireccionamientos no autorizados
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     
     container.appendChild(iframe);
     

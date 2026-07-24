@@ -411,7 +411,8 @@
                         </div>
 
                         <div id="adsterra-banner-container" style="width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:20px; background:var(--sidebar-bg); padding:10px; border-radius:16px; border:1px solid var(--border-light); overflow:hidden; min-height: 70px;">
-                            <iframe id="adsterra-secure-frame" style="width:320px; height:50px; border:none; overflow:hidden;" scrolling="no" srcdoc='
+                            <!-- Frame con sandbox restrictivo para mitigar redireccionamientos en dispositivos móviles -->
+                            <iframe id="adsterra-secure-frame" sandbox="allow-scripts allow-same-origin" style="width:320px; height:50px; border:none; overflow:hidden;" scrolling="no" srcdoc='
                                 <html style="margin:0; padding:0; overflow:hidden;">
                                 <body style="margin:0; padding:0; overflow:hidden; background:transparent; display:flex; justify-content:center; align-items:center;">
                                     <script type="text/javascript">

@@ -897,6 +897,7 @@ body {
 /* ========== DISEÑO RESPONSIVO MÓVIL ========== */
 @media (max-width: 768px) {
     body, .app-wrapper, .main-window {
+        height: 100vh !important;
         height: 100dvh !important;
     }
 
@@ -969,8 +970,11 @@ body {
         display: none !important;
     }
 
+    /* Corrección estricta de jerarquía flex en vista de chat móvil */
     .main-window.view-chat .chat-main {
         display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
     }
 
     #mobile-back-btn {
