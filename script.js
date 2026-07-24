@@ -2582,7 +2582,7 @@ async function handleUrlActions() {
 }
 
 // =======================================================
-// 11. INICIALIZACIÓN DE LA APP
+// 11. INICIALIZACIÓN DE LA APP Y REGISTRO DE SERVICE WORKER
 // =======================================================
 async function showApp(user) {
     try {
@@ -2712,15 +2712,27 @@ async function showApp(user) {
                 .subscribe();
         }, 100);
 
+        // REGISTRO Y AUTO-ACTUALIZACIÓN INTELIGENTE DEL SERVICE WORKER
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => {
-                        console.log('Service Worker registrado:', reg.scope);
-                    })
-                    .catch(err => {
-                        console.warn('Fallo al registrar Service Worker:', err);
-                    });
+            navigator.serviceWorker.register('sw.js?v=1.2.0').then((reg) => {
+                console.log('Service Worker registrado:', reg.scope);
+
+                // Detección automática de nueva versión
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    if (installingWorker) {
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed') {
+                                if (navigator.serviceWorker.controller) {
+                                    console.log('Nueva versión detectada. Recargando app automáticamente...');
+                                    window.location.reload();
+                                }
+                            }
+                        };
+                    }
+                };
+            }).catch(err => {
+                console.warn('Fallo al registrar Service Worker:', err);
             });
         }
     } catch (globalAppErr) {
@@ -2777,7 +2789,7 @@ async function loadContacts() {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact) return;
             
-            // EXCLUIR CONTACTOS OCULTOS EN V-PRIVADOS DE LA LISTA PÚBLICA
+            // EXCLUIR CONTACTOS OCULTOS EN V-PRIVADOS DE LA LISTA PÚBLICA DE FORMA ESTRICTA
             const isPrivateContact = privateList.some(id => String(id) === String(contact.id));
             if (isPrivateContact) {
                 return;
