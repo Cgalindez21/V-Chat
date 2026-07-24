@@ -387,6 +387,7 @@ body {
     justify-content: space-between;
     border-bottom: 1px solid var(--border-light);
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    flex-shrink: 0 !important; /* Evita que la barra superior colapse en pantallas pequeñas */
 }
 
 .chat-navbar h4 {
@@ -462,6 +463,12 @@ body {
     background: var(--sidebar-bg);
     border-top: 1px solid var(--border-light);
     padding: 14px 20px;
+    flex-shrink: 0 !important; /* Evita que el pie de página de entrada de texto colapse */
+    display: block !important;
+}
+
+.chat-footer.hidden {
+    display: none !important;
 }
 
 .emoji-bar {
@@ -991,6 +998,7 @@ body {
         padding: 8px 12px calc(8px + env(safe-area-inset-bottom)) 12px !important;
         flex-shrink: 0 !important;
         box-sizing: border-box !important;
+        display: block !important; /* Asegura visualización de bloque en render móvil */
     }
     
     .emoji-bar {
