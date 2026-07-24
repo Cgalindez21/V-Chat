@@ -80,12 +80,12 @@ window.addEventListener('beforeunload', () => {
 
 const EMOJI_DATA = {
     "Sonrisas y personas": ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🫢','🫣','🤫','🤔','🫡','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😌','😔','😪','🤤','😴','😷','👍','👎','👏','🙌','🫶','🙏','💪'],
-    "Animales y naturaleza": ['🐵','🐶','🐺','🦊','🦝','🐱','🦁','🐯','🐴','🦄','ZEBRA','🐷','🐹','🐰','🐻','🐼','🐨','🐸','🐙','🐒','🐟','🐠','🐡','🦈','🦋','💮','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🍀'],
+    "Animales y naturaleza": ['🐵','🐶','🐺','🦊','🦝','🐱','🦁','🐯','🐴','🦄','🐷','🐹','🐰','🐻','🐼','🐨','🐸','🐙','🐒','🐟','🐠','🐡','🦈','🦋','💮','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🍀'],
     "Comida y bebida": ['🍇','🍉','🍊','🍋','🍌','🍍','🍎','🍏','🍒','🍓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🍳','🥘','🍲','🍣','🧁','🍩','🍪','🍫','🍬','🍭','🍯','🥛','☕','🍵','🍺','🍻','🥂','🥤','🧋','🧃'],
     "Actividades": ['🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎁','🏆','🏅','🥇','⚽','⚾','🥎','🏀','🏈','🎾','🎱','🎯','🎮','🕹️','🎰','🎲','🧩','🧸','♠️','♥️','♦️','♣️','♟️','🎨','🎭','🎬'],
-    "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','canoe','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
-    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞','🪟','🛋️','🪑','toilet','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
-    "Símbolos": ['🏧','🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️']
+    "Viajes y lugares": ['🌍','🌎','🌐','🗺️','🧭','🏔️','🌋','🗻','🏖️','🏜️','🏝️','🏞️','🏠','🏡','🏢','🏫','🏯','🏰','⛪','⛩️','🕋','⛲','⛺','🏙️','🌄','🌅','🌆','🌇','🌉','🎡','🎢','🚂','🚌','🚗','🚘','🚙','🚚','🏎️','🏍️','🛵','🚲','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','🚤','🛳️','🚢','✈️','🚀','🛸','⌛','⏳','⌚','⏰','🌡️','☀️','🪐','⭐','🌟','🌠','🌌','☁️','⚡','❄️','☃️','🔥','💧','🌊'],
+    "Objetos": ['👓','🕶️','🥽','👔','👕','👖','🧣','🧤','🧥','🧦','👗','🩱','👙','👛','👜','🎒','👞','👟','👠','👑','🎩','🎓','⛑️','📿','💄','💎','📢','📣','🔔','🎼','🎵','🎶','🎙️','🎤','🎧','📱','📲','💻','🖥️','🖨️','⌨️','🖱️','🎞️','📽️','📺','📷','📸','📹','📼','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','💰','🪙','💴','💵','💸','💳','🧾','✉️','📧','📦','🗳️','✏️','📝','💼','📁','📂','📅','📆','🗒️','🗓️','📌','📍','📎','📏','📐','✂️','🗑️','🔒','🔓','🔑','🗝️','🔨','⛏️','⚒️','🛠️','🔬','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞','🪟','🛋️','🪑','🚿','🛁','🧹','🧺','🧻','🧼','🧯','🛒','🚬','🪦'],
+    "Símbolos": ['🚮','🚰','♿','🚹','🚺','🚻','🚼','🚾','⚠️','🚸','⛔','🚫','🚳','🚭','🚯','🚱','🚷','📵','🔞','☢️','☣️','🎦','⚛️','🕉️','✡️','☸️','☯️','✝️','☦️','☪️','☮️']
 };
 
 // =======================================================
@@ -95,7 +95,7 @@ async function sendTelegramMessage(telegramChatId, text) {
     if (!telegramChatId || !TELEGRAM_BOT_TOKEN) return;
     try {
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-        const response = await fetch(url, {
+        await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -105,11 +105,6 @@ async function sendTelegramMessage(telegramChatId, text) {
                 disable_web_page_preview: true
             })
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.warn("Error en Telegram API:", errorData);
-        }
     } catch (err) {
         console.warn("Fallo al enviar notificación de Telegram:", err);
     }
@@ -123,14 +118,8 @@ async function notifyUserViaTelegram(userId, text) {
             .eq('id', userId)
             .single();
             
-        if (error || !user) return;
-        
-        if (!user.telegram_chat_id || user.telegram_chat_id.trim() === '') {
-            return;
-        }
-        
+        if (error || !user || !user.telegram_chat_id || user.telegram_chat_id.trim() === '') return;
         await sendTelegramMessage(user.telegram_chat_id, text);
-        
     } catch (err) {
         console.warn("Fallo al verificar presencia para Telegram:", err);
     }
@@ -567,7 +556,7 @@ if (searchInput) {
 }
 
 // ============================================================
-// AUTH FORM - CORREGIDO CON BLOQUEO PREVENTIVO
+// AUTH FORM
 // ============================================================
 authForm.onsubmit = async (e) => {
     e.preventDefault();
@@ -1011,7 +1000,6 @@ messageForm.onsubmit = async (e) => {
     } else {
         messageInput.value = "";
         loadMessages();
-        // NOTIFICACIÓN A TELEGRAM (SOLO INFORMA QUE HAY UN MENSAJE NUEVO SIN DETALLAR CONTENIDO)
         const msgText = `💬 <b>Tienes un mensaje nuevo de ${escapeHTML(currentUser.name)}</b>\n\n📱 Abre V-Chat para ver tu mensaje.`;
         await notifyUserViaTelegram(activeChatId, msgText);
     }
@@ -1295,7 +1283,6 @@ function initChatMediaControls() {
                     if (insResult.error) throw insResult.error;
                     loadMessages();
 
-                    // NOTIFICACIÓN A TELEGRAM (SIN MOSTRAR CONTENIDO)
                     const msgText = `💬 <b>Tienes un mensaje nuevo de ${escapeHTML(currentUser.name)}</b>\n\n📱 Abre V-Chat para ver tu mensaje.`;
                     await notifyUserViaTelegram(activeChatId, msgText);
                 } catch (err) {
@@ -1345,7 +1332,6 @@ async function toggleVoiceRecording() {
                     if (insResult.error) throw insResult.error;
                     loadMessages();
 
-                    // NOTIFICACIÓN A TELEGRAM (SIN MOSTRAR CONTENIDO)
                     const msgText = `💬 <b>Tienes un mensaje nuevo de ${escapeHTML(currentUser.name)}</b>\n\n📱 Abre V-Chat para ver tu mensaje.`;
                     await notifyUserViaTelegram(activeChatId, msgText);
                 } catch (err) {
@@ -1508,45 +1494,49 @@ window.sendFriendRequestTo = async (targetUserId, targetName) => {
 };
 
 async function loadIncomingRequests() {
-    const { data, error } = await _supabase
-        .from('contacts')
-        .select('id, sender_id, users!contacts_sender_id_fkey(name, avatar_url)')
-        .eq('receiver_id', currentUser.id)
-        .eq('status', 'pending');
+    try {
+        const { data, error } = await _supabase
+            .from('contacts')
+            .select('id, sender_id, users!contacts_sender_id_fkey(name, avatar_url)')
+            .eq('receiver_id', currentUser.id)
+            .eq('status', 'pending');
+            
+        if (error || !data) return;
         
-    if (error) return;
-    
-    const container = document.getElementById('requests-list-container');
-    const badge = document.getElementById('requests-badge');
-    
-    if (data.length > 0) {
-        badge.innerText = data.length;
-        badge.classList.remove('hidden');
-    } else {
-        badge.classList.add('hidden');
-    }
-    
-    if (data.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:13px; margin-top:20px;">No tienes solicitudes pendientes.</p>`;
-        return;
-    }
-    
-    container.innerHTML = data.map(r => {
-        const sender = r.users;
-        const safeSenderName = escapeHTML(sender.name);
-        return `
-            <div class="request-item" style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--chat-bg); border-radius:12px; margin-bottom:8px; border:1px solid var(--border-light);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${sender.avatar_url}" class="avatar-sm">
-                    <strong style="font-size:14px; color:var(--text-main);">${safeSenderName}</strong>
+        const container = document.getElementById('requests-list-container');
+        const badge = document.getElementById('requests-badge');
+        
+        if (data.length > 0) {
+            badge.innerText = data.length;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+        
+        if (data.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:13px; margin-top:20px;">No tienes solicitudes pendientes.</p>`;
+            return;
+        }
+        
+        container.innerHTML = data.map(r => {
+            const sender = r.users;
+            const safeSenderName = escapeHTML(sender.name);
+            return `
+                <div class="request-item" style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--chat-bg); border-radius:12px; margin-bottom:8px; border:1px solid var(--border-light);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${sender.avatar_url}" class="avatar-sm">
+                        <strong style="font-size:14px; color:var(--text-main);">${safeSenderName}</strong>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="window.respondRequest('${r.id}', 'accepted')" style="background:var(--vchat-green); border:none; color:white; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:bold;">Aceptar</button>
+                        <button onclick="window.respondRequest('${r.id}', 'rejected')" style="background:#ff3b30; border:none; color:white; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:bold;">Rechazar</button>
+                    </div>
                 </div>
-                <div style="display:flex; gap:6px;">
-                    <button onclick="window.respondRequest('${r.id}', 'accepted')" style="background:var(--vchat-green); border:none; color:white; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:bold;">Aceptar</button>
-                    <button onclick="window.respondRequest('${r.id}', 'rejected')" style="background:#ff3b30; border:none; color:white; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:bold;">Rechazar</button>
-                </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
+    } catch(e) {
+        console.warn(e);
+    }
 }
 
 window.respondRequest = async (requestId, newStatus) => {
@@ -1557,7 +1547,7 @@ window.respondRequest = async (requestId, newStatus) => {
                 .delete()
                 .eq('id', requestId);
             if (response.error) throw response.error;
-            showToast("Solicitud de amistad de rechazada");
+            showToast("Solicitud de amistad rechazada");
         } else {
             const response = await _supabase
                 .from('contacts')
@@ -1582,6 +1572,7 @@ window.respondRequest = async (requestId, newStatus) => {
         loadIncomingRequests();
         window.lastContactsSignature = "";
         loadContacts();
+        loadStatuses();
     } catch (err) {
         showToast(err.message, true);
     }
@@ -1592,6 +1583,7 @@ _supabase.channel('realtime-contacts')
         loadIncomingRequests();
         window.lastContactsSignature = "";
         loadContacts();
+        loadStatuses();
     }).subscribe();
 
 // =======================================================
@@ -1710,176 +1702,198 @@ function detectMentions(text) {
 }
 
 async function loadStatuses() {
-    const { data: statuses, error: sErr } = await _supabase
-        .from('statuses')
-        .select('*')
-        .order('created_at', { ascending: false });
+    if (!currentUser) return;
 
-    if (sErr || !statuses) return;
-    await autoPurgeStories(statuses);
-
-    const activeStatuses = statuses.filter(s => {
-        const diffHours = Math.abs(new Date() - new Date(s.created_at)) / (1000 * 60 * 60);
-        return diffHours < 24;
-    });
-
-    const statusIds = activeStatuses.map(s => s.id);
-    let comments = [];
-    let reactions = [];
-
-    if (statusIds.length > 0) {
-        const { data: cData } = await _supabase
-            .from('status_comments')
+    try {
+        const { data: statuses, error: sErr } = await _supabase
+            .from('statuses')
             .select('*')
-            .in('status_id', statusIds)
-            .order('created_at', { ascending: true });
-        if (cData) comments = cData;
+            .order('created_at', { ascending: false });
 
-        const { data: rData } = await _supabase
-            .from('status_reactions')
-            .select('*')
-            .in('status_id', statusIds);
-        if (rData) reactions = rData;
-    }
+        if (sErr || !statuses) return;
+        await autoPurgeStories(statuses);
 
-    const container = document.getElementById('status-list-container');
-    container.innerHTML = activeStatuses.map(s => {
-        const isMine = s.user_id === currentUser.id;
-        const sComments = comments.filter(c => c.status_id === s.id);
-        const sReactions = reactions.filter(r => r.status_id === s.id);
-
-        const reactionCounts = sReactions.reduce((acc, curr) => {
-            acc[curr.emoji] = (acc[curr.emoji] || 0) + 1;
-            return acc;
-        }, {});
-
-        const myReaction = sReactions.find(r => r.user_id === currentUser.id)?.emoji;
-
-        let mediaHtml = '';
-        if (s.file_url) {
-            if (s.file_type === 'video') {
-                mediaHtml = `<video src="${s.file_url}" controls style="max-width:100%; border-radius:12px; margin-top:8px; outline:none; max-height: 340px; width: 100%; background: #000;"></video>`;
-            } else if (s.file_type === 'audio') {
-                mediaHtml = `
-                    <div style="background: rgba(0, 191, 165, 0.08); border: 1px solid var(--vchat-green); padding: 14px; border-radius: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
-                        <span style="font-size: 13.5px; color: var(--text-main); font-weight: bold; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-music" style="color: var(--vchat-green);"></i> Canción recomendada
-                        </span>
-                        <audio src="${s.file_url}" controls style="width: 100%; outline: none; filter: invert(0.08);"></audio>
-                    </div>
-                `;
-            } else {
-                mediaHtml = `<img src="${s.file_url}" style="max-width:100%; max-height:340px; border-radius:12px; margin-top:8px; object-fit: cover; width: 100%;" alt="Multimedia">`;
-            }
+        // SOLO SE MUESTRAN HISTORIAS DEL USUARIO O SUS CONTACTOS ACEPTADOS
+        const allowedUserIds = new Set([currentUser.id]);
+        if (Array.isArray(globalContacts)) {
+            globalContacts.forEach(c => {
+                const partnerId = c.sender_id === currentUser.id ? c.receiver_id : c.sender_id;
+                if (partnerId) allowedUserIds.add(partnerId);
+            });
         }
 
-        const emojis = ['👍', '❤️', '😂', '😮', '😢'];
-        let reactionOptionsHtml = emojis.map(emo => {
-            const isSelected = myReaction === emo;
-            const activeStyle = isSelected ? 'background: rgba(0, 191, 165, 0.25); border-radius: 8px;' : '';
-            return `<span onclick="window.toggleReaction('${s.id}', '${emo}', ${isSelected})" style="cursor:pointer; font-size:18px; padding:4px 8px; transition:transform 0.2s; display:inline-block; ${activeStyle}" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">${emo}</span>`;
-        }).join('');
+        const activeStatuses = statuses.filter(s => {
+            const diffHours = Math.abs(new Date() - new Date(s.created_at)) / (1000 * 60 * 60);
+            return diffHours < 24 && allowedUserIds.has(s.user_id);
+        });
 
-        reactionOptionsHtml += `<span onclick="window.openEmojiPicker('${s.id}', true)" style="cursor:pointer; font-size:15px; color:var(--vchat-green); font-weight:bold; display:inline-block; padding:4px 8px; user-select:none;" title="Reaccionar con cualquier emoji">➕</span>`;
+        const statusIds = activeStatuses.map(s => s.id);
+        let comments = [];
+        let reactions = [];
 
-        const reactionsSummary = Object.entries(reactionCounts).map(([emo, count]) => {
-            return `<span style="font-size:12px; background: rgba(255,255,255,0.04); padding:4px 8px; border-radius:12px; margin-right:4px; border:1px solid var(--border-light);">${emo} ${count}</span>`;
-        }).join('');
+        if (statusIds.length > 0) {
+            const { data: cData } = await _supabase
+                .from('status_comments')
+                .select('*')
+                .in('status_id', statusIds)
+                .order('created_at', { ascending: true });
+            if (cData) comments = cData;
 
-        const commentsHtml = sComments.map(c => {
-            const isCommentMine = c.user_id === currentUser.id;
-            const hasHeart = c.text.endsWith(" ❤️");
-            const cleanText = hasHeart ? c.text.substring(0, c.text.length - 2) : c.text;
+            const { data: rData } = await _supabase
+                .from('status_reactions')
+                .select('*')
+                .in('status_id', statusIds);
+            if (rData) reactions = rData;
+        }
 
-            const safeCommentName = escapeHTML(c.user_name);
-            const safeCommentText = escapeHTML(cleanText);
-            const formattedText = safeCommentText.replace(/@([A-Za-z0-9_À-ÿ]+(?:\s+[A-Za-z0-9_À-ÿ]+)?)/g, '<span class="mention-tag">@$1</span>');
-            
-            return `
-                <div class="comment-wrapper" id="comment-wrapper-${c.id}">
-                    <div class="comment-swipe-actions">
-                        <span class="comment-action-btn react-heart" onclick="window.toggleCommentHeart('${c.id}', '${c.text.replace(/'/g, "\\'")}', ${hasHeart})" title="Me gusta">
-                            <i class="${hasHeart ? 'fas' : 'far'} fa-heart"></i>
-                        </span>
-                        <span class="comment-action-btn reply-comment" onclick="window.replyToComment('${s.id}', '${c.user_name}')" title="Responder">
-                            <i class="fas fa-reply"></i>
-                        </span>
-                    </div>
-                    <div class="comment-item" id="comment-item-${c.id}" 
-                         ontouchstart="window.handleCommentTouchStart(event, '${c.id}')"
-                         ontouchmove="window.handleCommentTouchMove(event, '${c.id}')"
-                         ontouchend="window.handleCommentTouchEnd(event, '${c.id}')"
-                         onclick="window.toggleCommentSwipe('${c.id}')"
-                         style="font-size: 12.5px; background: #1f2c34 !important; padding: 8px 12px; border-radius: 10px; border-left:2px solid var(--vchat-green); display: flex; justify-content: space-between; align-items: center; user-select:none; -webkit-user-select:none;">
-                        <div>
-                            <strong style="color: var(--vchat-green); display: inline-flex; align-items: center; gap: 4px;">${safeCommentName}:</strong>
-                            <span style="color: var(--text-main); word-wrap: break-word;">${formattedText}</span>
-                            ${hasHeart ? `<span style="margin-left: 6px; color: #ff3b30; font-size:11px;">❤️</span>` : ''}
+        const container = document.getElementById('status-list-container');
+        if (!container) return;
+
+        if (activeStatuses.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:13px; margin-top:30px; padding:0 10px;">No hay publicaciones disponibles de tus contactos agregados.</p>`;
+            return;
+        }
+
+        container.innerHTML = activeStatuses.map(s => {
+            const isMine = s.user_id === currentUser.id;
+            const sComments = comments.filter(c => c.status_id === s.id);
+            const sReactions = reactions.filter(r => r.status_id === s.id);
+
+            const reactionCounts = sReactions.reduce((acc, curr) => {
+                acc[curr.emoji] = (acc[curr.emoji] || 0) + 1;
+                return acc;
+            }, {});
+
+            const myReaction = sReactions.find(r => r.user_id === currentUser.id)?.emoji;
+
+            let mediaHtml = '';
+            if (s.file_url) {
+                if (s.file_type === 'video') {
+                    mediaHtml = `<video src="${s.file_url}" controls style="max-width:100%; border-radius:12px; margin-top:8px; outline:none; max-height: 340px; width: 100%; background: #000;"></video>`;
+                } else if (s.file_type === 'audio') {
+                    mediaHtml = `
+                        <div style="background: rgba(0, 191, 165, 0.08); border: 1px solid var(--vchat-green); padding: 14px; border-radius: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+                            <span style="font-size: 13.5px; color: var(--text-main); font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-music" style="color: var(--vchat-green);"></i> Canción recomendada
+                            </span>
+                            <audio src="${s.file_url}" controls style="width: 100%; outline: none; filter: invert(0.08);"></audio>
                         </div>
-                        ${isCommentMine ? `
-                            <div style="display:flex; gap:8px; z-index: 3;" onclick="event.stopPropagation()">
-                                <i class="fas fa-edit" onclick="window.editComment('${c.id}', '${c.text}')" style="cursor:pointer; color:var(--text-sec); font-size:11px;"></i>
-                                <i class="fas fa-trash" onclick="window.deleteComment('${c.id}')" style="cursor:pointer; color:#ff3b30; font-size:11px;"></i>
+                    `;
+                } else {
+                    mediaHtml = `<img src="${s.file_url}" style="max-width:100%; max-height:340px; border-radius:12px; margin-top:8px; object-fit: cover; width: 100%;" alt="Multimedia">`;
+                }
+            }
+
+            const emojis = ['👍', '❤️', '😂', '😮', '😢'];
+            let reactionOptionsHtml = emojis.map(emo => {
+                const isSelected = myReaction === emo;
+                const activeStyle = isSelected ? 'background: rgba(0, 191, 165, 0.25); border-radius: 8px;' : '';
+                return `<span onclick="window.toggleReaction('${s.id}', '${emo}', ${isSelected})" style="cursor:pointer; font-size:18px; padding:4px 8px; transition:transform 0.2s; display:inline-block; ${activeStyle}" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">${emo}</span>`;
+            }).join('');
+
+            reactionOptionsHtml += `<span onclick="window.openEmojiPicker('${s.id}', true)" style="cursor:pointer; font-size:15px; color:var(--vchat-green); font-weight:bold; display:inline-block; padding:4px 8px; user-select:none;" title="Reaccionar con cualquier emoji">➕</span>`;
+
+            const reactionsSummary = Object.entries(reactionCounts).map(([emo, count]) => {
+                return `<span style="font-size:12px; background: rgba(255,255,255,0.04); padding:4px 8px; border-radius:12px; margin-right:4px; border:1px solid var(--border-light);">${emo} ${count}</span>`;
+            }).join('');
+
+            const commentsHtml = sComments.map(c => {
+                const isCommentMine = c.user_id === currentUser.id;
+                const hasHeart = c.text.endsWith(" ❤️");
+                const cleanText = hasHeart ? c.text.substring(0, c.text.length - 2) : c.text;
+
+                const safeCommentName = escapeHTML(c.user_name);
+                const safeCommentText = escapeHTML(cleanText);
+                const formattedText = safeCommentText.replace(/@([A-Za-z0-9_À-ÿ]+(?:\s+[A-Za-z0-9_À-ÿ]+)?)/g, '<span class="mention-tag">@$1</span>');
+                
+                return `
+                    <div class="comment-wrapper" id="comment-wrapper-${c.id}">
+                        <div class="comment-swipe-actions">
+                            <span class="comment-action-btn react-heart" onclick="window.toggleCommentHeart('${c.id}', '${c.text.replace(/'/g, "\\'")}', ${hasHeart})" title="Me gusta">
+                                <i class="${hasHeart ? 'fas' : 'far'} fa-heart"></i>
+                            </span>
+                            <span class="comment-action-btn reply-comment" onclick="window.replyToComment('${s.id}', '${c.user_name}')" title="Responder">
+                                <i class="fas fa-reply"></i>
+                            </span>
+                        </div>
+                        <div class="comment-item" id="comment-item-${c.id}" 
+                             ontouchstart="window.handleCommentTouchStart(event, '${c.id}')"
+                             ontouchmove="window.handleCommentTouchMove(event, '${c.id}')"
+                             ontouchend="window.handleCommentTouchEnd(event, '${c.id}')"
+                             onclick="window.toggleCommentSwipe('${c.id}')"
+                             style="font-size: 12.5px; background: #1f2c34 !important; padding: 8px 12px; border-radius: 10px; border-left:2px solid var(--vchat-green); display: flex; justify-content: space-between; align-items: center; user-select:none; -webkit-user-select:none;">
+                            <div>
+                                <strong style="color: var(--vchat-green); display: inline-flex; align-items: center; gap: 4px;">${safeCommentName}:</strong>
+                                <span style="color: var(--text-main); word-wrap: break-word;">${formattedText}</span>
+                                ${hasHeart ? `<span style="margin-left: 6px; color: #ff3b30; font-size:11px;">❤️</span>` : ''}
+                            </div>
+                            ${isCommentMine ? `
+                                <div style="display:flex; gap:8px; z-index: 3;" onclick="event.stopPropagation()">
+                                    <i class="fas fa-edit" onclick="window.editComment('${c.id}', '${c.text}')" style="cursor:pointer; color:var(--text-sec); font-size:11px;"></i>
+                                    <i class="fas fa-trash" onclick="window.deleteComment('${c.id}')" style="cursor:pointer; color:#ff3b30; font-size:11px;"></i>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const inputId = `comment-input-${s.id}`;
+
+            const safeStatusUser = escapeHTML(s.user_name);
+            const safeStatusText = escapeHTML(s.text);
+
+            return `
+                <div class="status-card" style="margin-bottom: 16px; padding: 16px; background: var(--hover-bg); border-radius: 16px; border: 1px solid var(--border-light); position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="${s.user_avatar || 'https://ui-avatars.com/api/?name=' + s.user_name}" class="avatar-sm">
+                            <div>
+                                <strong style="font-size: 14px; color: var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${safeStatusUser}</strong>
+                                <p style="font-size: 10px; color: var(--text-sec);">${new Date(s.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                            </div>
+                        </div>
+                        ${isMine ? `
+                            <div style="display:flex; gap:10px;">
+                                <button onclick="window.editStatusPrompt('${s.id}', '${s.text.replace(/'/g, "\\'")}')" style="background:none; border:none; color:var(--text-sec); cursor:pointer; font-size:14px;"><i class="fas fa-edit"></i></button>
+                                <button onclick="window.deleteStatus('${s.id}')" style="background:none; border:none; color:#ff3b30; cursor:pointer; font-size:14px;"><i class="fas fa-trash-alt"></i></button>
                             </div>
                         ` : ''}
+                    </div>
+
+                    ${s.text ? `<p style="font-size: 13.5px; color: var(--text-main); line-height:1.4; word-wrap:break-word;">${safeStatusText}</p>` : ''}
+                    ${mediaHtml}
+
+                    <div style="height: 1px; background: var(--border-light); margin: 12px 0 8px 0;"></div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                            ${reactionOptionsHtml}
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            ${reactionsSummary}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        ${commentsHtml}
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 12px; align-items: center;">
+                        <input type="text" id="${inputId}" placeholder="Escribe un comentario..." style="flex:1; padding:8px 12px; background:var(--input-bg); border:1px solid transparent; border-radius:12px; color:var(--text-main); font-size:12.5px; outline:none;" onkeypress="if(event.key === 'Enter') window.commentOnStatus('${s.id}', '${inputId}')">
+                        <button onclick="window.openEmojiPicker('${inputId}', false)" style="background:var(--input-bg); border:none; color:var(--text-sec); width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;" title="Insertar Emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <button onclick="window.commentOnStatus('${s.id}', '${inputId}')" style="background:var(--vchat-green); border:none; width:32px; height:32px; border-radius:50%; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </div>
                 </div>
             `;
         }).join('');
-
-        const inputId = `comment-input-${s.id}`;
-
-        const safeStatusUser = escapeHTML(s.user_name);
-        const safeStatusText = escapeHTML(s.text);
-
-        return `
-            <div class="status-card" style="margin-bottom: 16px; padding: 16px; background: var(--hover-bg); border-radius: 16px; border: 1px solid var(--border-light); position: relative;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${s.user_avatar || 'https://ui-avatars.com/api/?name=' + s.user_name}" class="avatar-sm">
-                        <div>
-                            <strong style="font-size: 14px; color: var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${safeStatusUser}</strong>
-                            <p style="font-size: 10px; color: var(--text-sec);">${new Date(s.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                        </div>
-                    </div>
-                    ${isMine ? `
-                        <div style="display:flex; gap:10px;">
-                            <button onclick="window.editStatusPrompt('${s.id}', '${s.text.replace(/'/g, "\\'")}')" style="background:none; border:none; color:var(--text-sec); cursor:pointer; font-size:14px;"><i class="fas fa-edit"></i></button>
-                            <button onclick="window.deleteStatus('${s.id}')" style="background:none; border:none; color:#ff3b30; cursor:pointer; font-size:14px;"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    ` : ''}
-                </div>
-
-                ${s.text ? `<p style="font-size: 13.5px; color: var(--text-main); line-height:1.4; word-wrap:break-word;">${safeStatusText}</p>` : ''}
-                ${mediaHtml}
-
-                <div style="height: 1px; background: var(--border-light); margin: 12px 0 8px 0;"></div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
-                        ${reactionOptionsHtml}
-                    </div>
-                    <div style="display: flex; gap: 4px;">
-                        ${reactionsSummary}
-                    </div>
-                </div>
-
-                <div style="margin-top: 10px;">
-                    ${commentsHtml}
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-top: 12px; align-items: center;">
-                    <input type="text" id="${inputId}" placeholder="Escribe un comentario..." style="flex:1; padding:8px 12px; background:var(--input-bg); border:1px solid transparent; border-radius:12px; color:var(--text-main); font-size:12.5px; outline:none;" onkeypress="if(event.key === 'Enter') window.commentOnStatus('${s.id}', '${inputId}')">
-                    <button onclick="window.openEmojiPicker('${inputId}', false)" style="background:var(--input-bg); border:none; color:var(--text-sec); width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;" title="Insertar Emoji">
-                        <i class="far fa-smile"></i>
-                    </button>
-                    <button onclick="window.commentOnStatus('${s.id}', '${inputId}')" style="background:var(--vchat-green); border:none; width:32px; height:32px; border-radius:50%; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
+    } catch(err) {
+        console.warn("Error en loadStatuses:", err);
+    }
 }
 
 window.handleCommentTouchStart = (e, commentId) => {
@@ -2146,7 +2160,8 @@ window.deleteContact = async (contactId, name) => {
         if (response.error) throw response.error;
         showToast("Contacto eliminado");
         window.lastContactsSignature = "";
-        loadContacts();
+        await loadContacts();
+        await loadStatuses();
     } catch (err) {
         console.error("Fallo al eliminar contacto:", err);
     }
@@ -2535,6 +2550,7 @@ async function handleUrlActions() {
                 window.lastContactsSignature = "";
                 loadContacts();
                 loadIncomingRequests();
+                loadStatuses();
             } else {
                 showToast("Error al aceptar la solicitud", true);
             }
@@ -2602,6 +2618,8 @@ async function showApp(user) {
         }
         
         currentUser = profile;
+
+        // DESBLOQUEAR INTERFAZ DE FORMA INMEDIATA
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         
@@ -2636,14 +2654,16 @@ async function showApp(user) {
         initNavigation();
         initEmojiBars();
         window.lastContactsSignature = "";
-        loadContacts();
+        
+        // CARGA ASÍNCRONA NO BLOQUEANTE
+        loadContacts().then(() => {
+            loadStatuses();
+        }).catch(console.warn);
+        
         loadIncomingRequests();
-        loadStatuses();
         initChatMediaControls();
-        
         loadSafeAd();
-        
-        await handleUrlActions();
+        handleUrlActions();
         
         window.showFeedView();
 
@@ -2713,6 +2733,7 @@ async function loadContacts() {
                 id,
                 sender_id,
                 receiver_id,
+                status,
                 sender:users!contacts_sender_id_fkey(*),
                 receiver:users!contacts_receiver_id_fkey(*)
             `)
@@ -2721,53 +2742,18 @@ async function loadContacts() {
             
         if (contactsErr) return;
 
-        const { data: msgData, error: msgErr } = await _supabase
-            .from('messages')
-            .select('sender_id, receiver_id')
-            .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
-            
-        let nonContactUsers = [];
-        if (!msgErr && msgData) {
-            const activeUserIds = new Set();
-            msgData.forEach(m => {
-                if (m.sender_id !== currentUser.id) activeUserIds.add(m.sender_id);
-                if (m.receiver_id !== currentUser.id) activeUserIds.add(m.receiver_id);
-            });
-            
-            const contactIds = new Set();
-            contactsData.forEach(c => {
-                const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
-                if (contact) contactIds.add(contact.id);
-            });
-            
-            const missingIds = [...activeUserIds].filter(id => !contactIds.has(id));
-            if (missingIds.length > 0) {
-                const { data: missingUsers } = await _supabase
-                    .from('users')
-                    .select('*')
-                    .in('id', missingIds);
-                if (missingUsers) {
-                    nonContactUsers = missingUsers;
-                }
-            }
-        }
-        
-        globalContacts = contactsData;
+        globalContacts = contactsData || [];
         
         const privateListStr = localStorage.getItem(`vchat_private_list_${currentUser.id}`) || '[]';
         const privateList = JSON.parse(privateListStr);
         
         const signature = JSON.stringify([
             privateList,
-            ...contactsData.map(c => {
+            ...globalContacts.map(c => {
                 const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
                 if (!contact) return null;
                 const isOnline = window.onlineUsersList && window.onlineUsersList.includes(contact.id);
                 return { id: contact.id, name: contact.name, status: isOnline ? 'online' : 'offline', avatar: contact.avatar_url, song: contact.listening_to, is_premium: contact.is_premium, isContact: true };
-            }),
-            ...nonContactUsers.map(u => {
-                const isOnline = window.onlineUsersList && window.onlineUsersList.includes(u.id);
-                return { id: u.id, name: u.name, status: isOnline ? 'online' : 'offline', avatar: u.avatar_url, song: u.listening_to, is_premium: u.is_premium, isContact: false };
             })
         ].filter(Boolean));
         
@@ -2778,14 +2764,15 @@ async function loadContacts() {
         window.lastContactsSignature = signature;
         
         const container = document.getElementById('contactList');
+        if (!container) return;
         container.innerHTML = '';
         
-        if (contactsData.length === 0 && nonContactUsers.length === 0) {
+        if (globalContacts.length === 0) {
             container.innerHTML = `<p style="text-align:center; color:var(--text-sec); font-size:13px; margin-top:20px; padding:0 10px;">No tienes amigos agregados. Envía solicitudes usando su ID único.</p>`;
             return;
         }
         
-        contactsData.forEach(c => {
+        globalContacts.forEach(c => {
             const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
             if (!contact) return;
             
@@ -2848,67 +2835,12 @@ async function loadContacts() {
             container.appendChild(item);
         });
 
-        nonContactUsers.forEach(u => {
-            const isOnline = window.onlineUsersList && window.onlineUsersList.includes(u.id);
-            const isVip = u.is_premium;
-            const vipCrownHtml = isVip ? `<span class="vip-crown" title="Usuario VIP"><i class="fas fa-crown"></i></span>` : '';
-            
-            let subTextHtml = `<p style="font-size:12px; color:var(--vchat-green); margin-top:2px;">Chat Directo (No Agregado)</p>`;
-            if (u.listening_to && u.listening_to.trim() !== '') {
-                const safeSong = escapeHTML(u.listening_to);
-                subTextHtml = `
-                    <p style="font-size:12px; color:var(--vchat-green); margin-top:2px; display:flex; align-items:center; gap:5px; font-weight: 500;">
-                        <i class="fas fa-music" style="font-size:10px; animation: pulse 1.5s infinite ease-in-out;"></i>
-                        <span style="font-style:italic; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Escuchando: ${safeSong}</span>
-                    </p>
-                `;
-            }
-            
-            const avatarSrc = (u.avatar_url && u.avatar_url.trim() !== '') 
-                ? u.avatar_url 
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=00bfa5&color=fff`;
-
-            const safeNonContactName = escapeHTML(u.name);
-
-            const itemHtml = `
-                <img src="${avatarSrc}" class="avatar-sm" alt="Avatar">
-                <div style="flex:1;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="font-size:15px; color:var(--text-main); display: inline-flex; align-items: center; gap: 5px;">${safeNonContactName}${vipCrownHtml}</strong>
-                        <span style="font-size:10px; color:${isOnline ? 'var(--vchat-green)' : 'var(--text-sec)'}; font-weight:bold;">
-                            <i class="fas fa-circle" style="font-size:7px; margin-right:4px;"></i>${isOnline ? 'en línea' : 'offline'}
-                        </span>
-                    </div>
-                    ${subTextHtml}
-                </div>
-            `;
-            
-            const item = document.createElement('div');
-            item.className = 'contact-item';
-            item.style.display = 'flex';
-            item.style.alignItems = 'center';
-            item.style.gap = '15px';
-            item.style.padding = '14px 18px';
-            item.style.cursor = 'pointer';
-            item.style.borderRadius = '14px';
-            item.style.marginBottom = '6px';
-            item.style.transition = 'all 0.2s';
-            item.style.border = '1px dashed rgba(0, 191, 165, 0.15)';
-            item.innerHTML = itemHtml;
-            
-            item.onclick = () => {
-                window.startChat(u.id, u.name, avatarSrc, u);
-            };
-            
-            container.appendChild(item);
-        });
-
         const settingsManager = document.getElementById('settings-contacts-manager');
         if (settingsManager) {
-            if (contactsData.length === 0) {
+            if (globalContacts.length === 0) {
                 settingsManager.innerHTML = `<p style="font-size:11.5px; color:var(--text-sec); text-align:center; padding:10px 0;">No tienes contactos agregados.</p>`;
             } else {
-                settingsManager.innerHTML = contactsData.map(c => {
+                settingsManager.innerHTML = globalContacts.map(c => {
                     const contact = c.sender_id === currentUser.id ? c.receiver : c.sender;
                     if (!contact) return '';
                     const safeContactName = escapeHTML(contact.name);
