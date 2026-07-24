@@ -1093,3 +1093,42 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(22px);
 }
+
+/* =======================================================
+   CONTROL SEGURO DE PUBLICIDAD
+   ======================================================= */
+
+/* Prevenir cualquier elemento que pueda desbordarse */
+#adsterra-banner-container {
+    overflow: hidden !important;
+    max-height: 70px !important;
+    min-height: 60px !important;
+    position: relative !important;
+    contain: strict !important;
+}
+
+#adsterra-banner-container iframe {
+    max-width: 320px !important;
+    max-height: 50px !important;
+    width: 320px !important;
+    height: 50px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+/* Prevenir cualquier overlay o popup malicioso */
+.modal-overlay:not([style*="display: none"]) {
+    z-index: 10000 !important;
+}
+
+/* Asegurar que los anuncios no se salgan del contenedor */
+#adsterra-banner-container > * {
+    max-width: 100% !important;
+    max-height: 70px !important;
+    overflow: hidden !important;
+}
+
+/* Bloquear cualquier elemento fijo que no sea parte de la app */
+body > div:not(#app-container):not(#auth-screen):not(.modal-overlay):not(#toast-notification) {
+    display: none !important;
+}

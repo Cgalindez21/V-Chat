@@ -2961,49 +2961,159 @@ setInterval(() => {
 }, 5000);
 
 // =======================================================
-// 12. CONTROL SEGURO DE PUBLICIDAD
+// 12. CONTROL SEGURO DE PUBLICIDAD (CORREGIDO)
 // =======================================================
 function loadSafeAd() {
     const container = document.getElementById('adsterra-banner-container');
     if (!container) return;
     
+    // Si es usuario premium, ocultar publicidad
     if (currentUser && currentUser.is_premium) {
         container.style.display = 'none';
         return;
     }
     
-    container.innerHTML = ''; 
+    // Limpiar contenedor
+    container.innerHTML = '';
+    container.style.display = 'flex';
+    container.style.justifyContent = 'center';
+    container.style.alignItems = 'center';
+    container.style.overflow = 'hidden';
+    container.style.position = 'relative';
+    container.style.minHeight = '70px';
+    container.style.maxHeight = '70px';
+    container.style.width = '100%';
+    container.style.maxWidth = '100%';
+    container.style.background = 'var(--sidebar-bg)';
+    container.style.borderRadius = '16px';
+    container.style.border = '1px solid var(--border-light)';
+    
+    // Crear un contenedor interno para el iframe con dimensiones fijas
+    const iframeWrapper = document.createElement('div');
+    iframeWrapper.style.width = '100%';
+    iframeWrapper.style.maxWidth = '320px';
+    iframeWrapper.style.height = '50px';
+    iframeWrapper.style.display = 'flex';
+    iframeWrapper.style.justifyContent = 'center';
+    iframeWrapper.style.alignItems = 'center';
+    iframeWrapper.style.overflow = 'hidden';
+    iframeWrapper.style.position = 'relative';
+    iframeWrapper.style.margin = '0 auto';
     
     const iframe = document.createElement('iframe');
     iframe.style.width = '320px';
     iframe.style.height = '50px';
     iframe.style.border = 'none';
     iframe.style.overflow = 'hidden';
+    iframe.style.borderRadius = '8px';
     iframe.scrolling = 'no';
-    
+    iframe.allow = '';
+
+    // CONFIGURACIÓN DE SANDBOX MUY RESTRICTIVA
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.sandbox.add('allow-scripts');
+    iframe.sandbox.add('allow-same-origin');
     
-    container.appendChild(iframe);
+    // Asegurar que no se pueda redirigir la página padre
+    iframe.setAttribute('allow', '');
     
+    // Cargar el anuncio con un script controlado
     const adHtml = `
-        <html style="margin:0; padding:0; overflow:hidden;">
-        <body style="margin:0; padding:0; overflow:hidden; background:transparent; display:flex; justify-content:center; align-items:center;">
-            <script type="text/javascript">
-                atOptions = {
-                    'key' : 'ce71424fc983cc29c763e0e5e6d63157',
-                    'format' : 'iframe',
-                    'height' : 50,
-                    'width' : 320,
-                    'params' : {}
-                };
-            </script>
-            <script type="text/javascript" src="https://www.highperformanceformat.com/ce71424fc983cc29c763e0e5e6d63157/invoke.js"></script>
+        <!DOCTYPE html>
+        <html style="margin:0; padding:0; overflow:hidden; width:100%; height:100%;">
+        <head>
+            <style>
+                * { margin:0; padding:0; box-sizing:border-box; }
+                body { 
+                    margin:0; 
+                    padding:0; 
+                    overflow:hidden; 
+                    background:transparent; 
+                    display:flex; 
+                    justify-content:center; 
+                    align-items:center;
+                    width:100%;
+                    height:100%;
+                    min-height:50px;
+                }
+                #ad-container {
+                    width:320px;
+                    height:50px;
+                    overflow:hidden;
+                    position:relative;
+                    display:flex;
+                    justify-content:center;
+                    align-items:center;
+                }
+                /* Limitar cualquier elemento que se desborde */
+                #ad-container * {
+                    max-width:320px !important;
+                    max-height:50px !important;
+                    overflow:hidden !important;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="ad-container">
+                <script type="text/javascript">
+                    // Prevenir cualquier redirección o popup
+                    window.open = function() { return null; };
+                    window.alert = function() { return null; };
+                    window.confirm = function() { return false; };
+                    window.prompt = function() { return null; };
+                    
+                    // Prevenir que el anuncio intente redirigir
+                    window.top.location.href = window.location.href;
+                    
+                    // Configuración del anuncio
+                    atOptions = {
+                        'key' : 'ce71424fc983cc29c763e0e5e6d63157',
+                        'format' : 'iframe',
+                        'height' : 50,
+                        'width' : 320,
+                        'params' : {}
+                    };
+                <\/script>
+                <script type="text/javascript" src="https://www.highperformanceformat.com/ce71424fc983cc29c763e0e5e6d63157/invoke.js"><\/script>
+            </div>
+            <script>
+                // Control adicional: después de 5 segundos, verificar que el anuncio no haya creado elementos fuera del contenedor
+                setTimeout(function() {
+                    var container = document.getElementById('ad-container');
+                    if (container) {
+                        var bodyChildren = document.body.children;
+                        for (var i = 0; i < bodyChildren.length; i++) {
+                            if (bodyChildren[i] !== container && bodyChildren[i].tagName !== 'SCRIPT') {
+                                bodyChildren[i].style.display = 'none';
+                            }
+                        }
+                    }
+                }, 5000);
+            <\/script>
         </body>
         </html>
     `;
     
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write(adHtml);
-    doc.close();
+    // Usar srcdoc para cargar el contenido
+    iframe.srcdoc = adHtml;
+    
+    iframeWrapper.appendChild(iframe);
+    container.appendChild(iframeWrapper);
+    
+    // Añadir mensaje informativo de que el anuncio es necesario
+    const adNotice = document.createElement('div');
+    adNotice.style.cssText = `
+        position: absolute;
+        bottom: 2px;
+        right: 8px;
+        font-size: 7px;
+        color: var(--text-sec);
+        opacity: 0.4;
+        pointer-events: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        z-index: 1;
+    `;
+    adNotice.textContent = 'PUBLICIDAD';
+    container.appendChild(adNotice);
 }
